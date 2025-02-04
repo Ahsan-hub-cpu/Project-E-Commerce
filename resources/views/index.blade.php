@@ -49,10 +49,38 @@
     margin-bottom: 3rem; /* Space below Featured Products */
 }
 
-/* Add spacing between New Arrival and Featured Products */
+/* Add spacing between New Arrivals and Featured Products */
 .new-arrivals {
-    margin-top: 3rem; /* Space above New Arrival */
+    margin-top: 3rem; /* Space above New Arrivals */
 }
+
+/* Sold Out Badge Style */
+
+
+.sold-out-badge {
+    position: absolute;
+    bottom: 22px;
+    right: 35px;
+    background: #ff9800;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 5px;
+    z-index: 10;
+  }
+
+  .pc__sold-out {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.7);
+    color: #fff;
+    padding: 5px 10px;
+    font-weight: bold;
+    border-radius: 3px;
+    z-index: 10;
+  }
 </style>
 <main>
   <!-- Slideshow Section -->
@@ -68,7 +96,7 @@
           <div class="overflow-hidden position-relative h-100">
             <div class="slideshow-character position-absolute bottom-0 pos_right-center">
               <img loading="lazy" src="{{ asset('uploads/slides') }}/{{$slide->image}}" width="542" height="733"
-                alt="Woman Fashion 1"
+                alt="Slide Image"
                 class="slideshow-character__img animate animate_fade animate_btt animate_delay-9 w-auto h-auto" />
               <div class="character_markup type2">
                 <p class="text-uppercase font-sofia mark-grey-color animate animate_fade animate_btt animate_delay-10 mb-0">
@@ -115,14 +143,21 @@
           }'>
             <div class="swiper-wrapper">
               @foreach($sproducts as $sproduct)
-                <div class="swiper-slide product-card product-card_style3">
+                <div class="swiper-slide product-card product-card_style3" style="position: relative;">
                   <div class="pc__img-wrapper">
-                    <a href="{{route('shop.product.details',['product_slug'=>$sproduct->slug])}}">
-                      <img loading="lazy" src="{{asset('uploads/products')}}/{{$sproduct->image}}" width="200" height="auto" alt="{{$sproduct->name}}" class="pc__img">
+                    <a href="{{ route('shop.product.details', ['product_slug' => $sproduct->slug]) }}">
+                      <img loading="lazy" src="{{ asset('uploads/products/' . $sproduct->image) }}" width="200" height="auto" alt="{{ $sproduct->name }}" class="pc__img">
                     </a>
+                    @if($sproduct->quantity <= 0)
+                      <div class="sold-out-badge">Sold Out</div>
+                    @endif
                   </div>
                   <div class="pc__info position-relative">
-                    <h6 class="pc__title"><a href="{{route('shop.product.details',['product_slug'=>$sproduct->slug])}}">{{$sproduct->name}}</a></h6>
+                    <h6 class="pc__title">
+                      <a href="{{ route('shop.product.details', ['product_slug' => $sproduct->slug]) }}">
+                        {{ $sproduct->name }}
+                      </a>
+                    </h6>
                     <div class="product-card__price d-flex">
                       <span class="money price text-secondary">
                         @if($sproduct->sale_price)
@@ -165,14 +200,21 @@
           }'>
             <div class="swiper-wrapper">
               @foreach($fproducts as $fproduct)
-                <div class="swiper-slide product-card product-card_style3">
+                <div class="swiper-slide product-card product-card_style3" style="position: relative;">
                   <div class="pc__img-wrapper">
-                    <a href="{{route('shop.product.details',['product_slug'=>$fproduct->slug])}}">
-                      <img loading="lazy" src="{{asset('uploads/products')}}/{{$fproduct->image}}" width="200" height="auto" alt="{{$fproduct->name}}" class="pc__img">
+                    <a href="{{ route('shop.product.details', ['product_slug' => $fproduct->slug]) }}">
+                      <img loading="lazy" src="{{ asset('uploads/products/' . $fproduct->image) }}" width="200" height="auto" alt="{{ $fproduct->name }}" class="pc__img">
                     </a>
+                    @if($fproduct->quantity <= 0)
+                      <div class="sold-out-badge">Sold Out</div>
+                    @endif
                   </div>
                   <div class="pc__info position-relative">
-                    <h6 class="pc__title"><a href="{{route('shop.product.details',['product_slug'=>$fproduct->slug])}}">{{$fproduct->name}}</a></h6>
+                    <h6 class="pc__title">
+                      <a href="{{ route('shop.product.details', ['product_slug' => $fproduct->slug]) }}">
+                        {{ $fproduct->name }}
+                      </a>
+                    </h6>
                     <div class="product-card__price d-flex">
                       <span class="money price text-secondary">
                         @if($fproduct->sale_price)
@@ -215,14 +257,21 @@
           }'>
             <div class="swiper-wrapper">
               @foreach($newArrivals as $product)
-                <div class="swiper-slide product-card product-card_style3">
+                <div class="swiper-slide product-card product-card_style3" style="position: relative;">
                   <div class="pc__img-wrapper">
-                    <a href="{{route('shop.product.details',['product_slug'=>$product->slug])}}">
-                      <img loading="lazy" src="{{asset('uploads/products')}}/{{$product->image}}" width="200" height="auto" alt="{{$product->name}}" class="pc__img">
+                    <a href="{{ route('shop.product.details', ['product_slug' => $product->slug]) }}">
+                      <img loading="lazy" src="{{ asset('uploads/products/' . $product->image) }}" width="200" height="auto" alt="{{ $product->name }}" class="pc__img">
                     </a>
+                    @if($product->quantity <= 0)
+                      <div class="sold-out-badge">Sold Out</div>
+                    @endif
                   </div>
                   <div class="pc__info position-relative">
-                    <h6 class="pc__title"><a href="{{route('shop.product.details',['product_slug'=>$product->slug])}}">{{$product->name}}</a></h6>
+                    <h6 class="pc__title">
+                      <a href="{{ route('shop.product.details', ['product_slug' => $product->slug]) }}">
+                        {{ $product->name }}
+                      </a>
+                    </h6>
                     <div class="product-card__price d-flex">
                       <span class="money price text-secondary">
                         @if($product->sale_price)

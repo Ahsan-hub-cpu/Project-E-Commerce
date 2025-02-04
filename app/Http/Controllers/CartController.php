@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\Sizes;
 use App\Models\OrderItem;
 use App\Models\Product_Variations;
+use App\Models\Product;
 use App\Models\Transaction;
 use Carbon\Carbon;
 use Cart;
@@ -17,41 +18,44 @@ use App\Mail\OrderConfirmation;
 
 class CartController extends Controller
 {
-    // Display cart items
+
     public function index()
     {
         $cartItems = Cart::instance('cart')->content();
         return view('cart', compact('cartItems'));
     }
 
-    // Add product to cart with size and color
     public function addToCart(Request $request)
     {
         $request->validate([
-            'size_id' => 'required|exists:sizes,id',   
+            'size_id'  => 'required|exists:sizes,id',
+            'quantity' => 'required|integer|min:1'
         ]);
 
         $size = Sizes::find($request->size_id);
-
+    
         if ($size) {
-            // Assuming you have a product variation model that links size and color
             $productVariation = Product_Variations::where('product_id', $request->id)
                                                     ->where('size_id', $size->id)
                                                     ->first();
-
+    
             if ($productVariation) {
+                if ($request->quantity > $productVariation->quantity) {
+                    return redirect()->back()->with('error', 'Sorry, only ' . $productVariation->quantity . ' items are available in stock.');
+                }
+    
                 Cart::instance('cart')->add(
-                    $request->id,                          // Product ID
-                    $request->name,                         // Product Name
-                    $request->quantity,                     // Quantity
-                    $request->price,                        // Price
+                    $request->id,                         
+                    $request->name,                       
+                    $request->quantity,                    
+                    $request->price,                      
                     [
-                        'size' => $size->name,              // Size Name
-                        'size_id' => $size->id,             // Size ID
-                        'product_variation_id' => $productVariation->id,  // Product Variation ID
+                        'size'                => $size->name,              // Size Name
+                        'size_id'             => $size->id,                // Size ID
+                        'product_variation_id'=> $productVariation->id,    // Product Variation ID
                     ]
                 )->associate('App\Models\Product'); 
-
+    
                 return redirect()->back()->with('success', 'Product added to cart!');
             } else {
                 return redirect()->back()->with('error', 'Product variation not found.');
@@ -60,6 +64,7 @@ class CartController extends Controller
             return redirect()->back()->with('error', 'Invalid size or color selection.');
         }
     }
+    
 
     // Increase the quantity of an item in the cart
     public function increase_item_quantity($rowId)
@@ -181,60 +186,78 @@ class CartController extends Controller
         }
     }
 
-  
     public function place_order(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email',
-            'name' => 'required|max:100',
-            'phone' => 'required|numeric|digits:10',
-            'zip' => 'required|numeric|digits:6',
-            'state' => 'required',
-            'city' => 'required',
-            'address' => 'required',
-            'locality' => 'required',
-            'landmark' => 'nullable',
-            'mode' => 'required|in:card,paypal,cod',  
-        ]);
-        $this->setAmountForCheckout();
-        $checkout = session()->get('checkout');
-        if (!$checkout) {
-            return redirect()->route('cart.index')->with('error', 'Checkout data is missing.');
+{
+    $request->validate([
+        'email'    => 'required|email',
+        'name'     => 'required|max:100',
+        'phone'    => 'required|numeric|digits:10',
+        'zip'      => 'required|numeric|digits:6',
+        'state'    => 'required',
+        'city'     => 'required',
+        'address'  => 'required',
+        'locality' => 'required',
+        'landmark' => 'nullable',
+        'mode'     => 'required|in:card,paypal,cod',
+    ]);
+
+    $this->setAmountForCheckout();
+    $checkout = session()->get('checkout');
+
+    if (!$checkout) {
+        return redirect()->route('cart.index')->with('error', 'Checkout data is missing.');
+    }
+
+    $subtotal = (float) str_replace(',', '', $checkout['subtotal']);
+    $discount = (float) str_replace(',', '', $checkout['discount']);
+    $tax      = (float) str_replace(',', '', $checkout['tax']);
+    $total    = (float) str_replace(',', '', $checkout['total']);
+
+    try {
+
+        foreach (Cart::instance('cart')->content() as $item) {
+            $product = Product::find($item->id);
+            if (!$product) {
+                return back()->with('error', "Product not found.");
+            }
+            if ($product->quantity < $item->qty) {
+                return back()->with('error', "Sorry, {$product->name} is out of stock.");
+            }
         }
-    
-        $subtotal = (float) str_replace(',', '', $checkout['subtotal']);
-        $discount = (float) str_replace(',', '', $checkout['discount']);
-        $tax = (float) str_replace(',', '', $checkout['tax']);
-        $total = (float) str_replace(',', '', $checkout['total']);
-    
-      
+
         $order = new Order();
-        $order->email = $request->email; 
+        $order->email    = $request->email;
         $order->subtotal = $subtotal;
         $order->discount = $discount;
-        $order->tax = $tax;
-        $order->total = $total;
-        $order->name = $request->name;
-        $order->phone = $request->phone;
+        $order->tax      = $tax;
+        $order->total    = $total;
+        $order->name     = $request->name;
+        $order->phone    = $request->phone;
         $order->locality = $request->locality;
-        $order->address = $request->address;
-        $order->city = $request->city;
-        $order->state = $request->state;
-        $order->country = 'N/A'; 
+        $order->address  = $request->address;
+        $order->city     = $request->city;
+        $order->state    = $request->state;
+        $order->country  = 'N/A';
         $order->landmark = $request->landmark;
-        $order->zip = $request->zip;
+        $order->zip      = $request->zip;
         $order->save();
-    
+
+       
         foreach (Cart::instance('cart')->content() as $item) {
+            $product = Product::find($item->id);
+            $product->quantity -= $item->qty;
+            $product->save();
+
+       
             $orderItem = new OrderItem();
-            $orderItem->product_id = $item->id;
-            $orderItem->order_id = $order->id;
-            $orderItem->price = $item->price;
-            $orderItem->quantity = $item->qty;
+            $orderItem->product_id           = $item->id;
+            $orderItem->order_id             = $order->id;
+            $orderItem->price                = $item->price;
+            $orderItem->quantity             = $item->qty;
             $orderItem->product_variation_id = $item->options->product_variation_id ?? null;
             $orderItem->save();
         }
-    
+
         if ($request->mode === 'cod') {
             $transaction = new Transaction();
             $transaction->order_id = $order->id;
@@ -242,23 +265,105 @@ class CartController extends Controller
             $transaction->status = 'pending';
             $transaction->save();
         }
-    
+
         Cart::instance('cart')->destroy();
-        session()->forget('checkout');
-        session()->forget('coupon');
-        session()->forget('discounts');
+        session()->forget(['checkout', 'coupon', 'discounts']);
         session()->put('order_id', $order->id);
-    
+
         try {
-            Log::info('Sending order confirmation email...', ['order' => $order]);
             Mail::to($request->email)->send(new OrderConfirmation($order));
         } catch (\Exception $e) {
             Log::error('Error sending email', ['error' => $e->getMessage()]);
-            return redirect()->route('cart.confirmation')->with('error', 'There was an issue sending the email.');
+            return redirect()->route('cart.confirmation')->with('error', 'Issue sending confirmation email.');
         }
-    
+
         return redirect()->route('cart.confirmation')->with('order_id', $order->id);
+
+    } catch (\Exception $e) {
+        Log::error('Order placement failed', ['error' => $e->getMessage()]);
+        return back()->with('error', 'Order could not be placed. Please try again.');
     }
+}
+
+
+  
+    // public function place_order(Request $request)
+    // {
+    //     $request->validate([
+    //         'email' => 'required|email',
+    //         'name' => 'required|max:100',
+    //         'phone' => 'required|numeric|digits:10',
+    //         'zip' => 'required|numeric|digits:6',
+    //         'state' => 'required',
+    //         'city' => 'required',
+    //         'address' => 'required',
+    //         'locality' => 'required',
+    //         'landmark' => 'nullable',
+    //         'mode' => 'required|in:card,paypal,cod',  
+    //     ]);
+    //     $this->setAmountForCheckout();
+    //     $checkout = session()->get('checkout');
+    //     if (!$checkout) {
+    //         return redirect()->route('cart.index')->with('error', 'Checkout data is missing.');
+    //     }
+    
+    //     $subtotal = (float) str_replace(',', '', $checkout['subtotal']);
+    //     $discount = (float) str_replace(',', '', $checkout['discount']);
+    //     $tax = (float) str_replace(',', '', $checkout['tax']);
+    //     $total = (float) str_replace(',', '', $checkout['total']);
+    
+      
+    //     $order = new Order();
+    //     $order->email = $request->email; 
+    //     $order->subtotal = $subtotal;
+    //     $order->discount = $discount;
+    //     $order->tax = $tax;
+    //     $order->total = $total;
+    //     $order->name = $request->name;
+    //     $order->phone = $request->phone;
+    //     $order->locality = $request->locality;
+    //     $order->address = $request->address;
+    //     $order->city = $request->city;
+    //     $order->state = $request->state;
+    //     $order->country = 'N/A'; 
+    //     $order->landmark = $request->landmark;
+    //     $order->zip = $request->zip;
+    //     $order->save();
+    
+    //     foreach (Cart::instance('cart')->content() as $item) {
+    //         $orderItem = new OrderItem();
+    //         $orderItem->product_id = $item->id;
+    //         $orderItem->order_id = $order->id;
+    //         $orderItem->price = $item->price;
+    //         $orderItem->quantity = $item->qty;
+    //         $orderItem->product_variation_id = $item->options->product_variation_id ?? null;
+    //         $orderItem->save();
+    //     }
+    
+    //     if ($request->mode === 'cod') {
+    //         $transaction = new Transaction();
+    //         $transaction->order_id = $order->id;
+    //         $transaction->mode = 'cod';
+    //         $transaction->status = 'pending';
+    //         $transaction->save();
+    //     }
+    
+    //     Cart::instance('cart')->destroy();
+    //     session()->forget('checkout');
+    //     session()->forget('coupon');
+    //     session()->forget('discounts');
+    //     session()->put('order_id', $order->id);
+    
+    //     try {
+    //         Log::info('Sending order confirmation email...', ['order' => $order]);
+    //         Mail::to($request->email)->send(new OrderConfirmation($order));
+    //     } catch (\Exception $e) {
+    //         Log::error('Error sending email', ['error' => $e->getMessage()]);
+    //         return redirect()->route('cart.confirmation')->with('error', 'There was an issue sending the email.');
+    //     }
+    
+    //     return redirect()->route('cart.confirmation')->with('order_id', $order->id);
+    // }
     
 
     public function confirmation()

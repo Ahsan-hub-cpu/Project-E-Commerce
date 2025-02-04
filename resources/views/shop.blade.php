@@ -6,135 +6,113 @@
   .slideshow-bg { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
   .slideshow-bg__img { width: 100%; height: 100%; object-fit: contain; }
   .category-header {
-  border-bottom: 1px solid #e0e0e0;
-  background-color: #f8f9fa;
-}
-
-.category-link {
-  padding: 8px 12px;
-  display: inline-block;
-  transition: all 0.3s ease;
-}
-
-.category-link:hover {
-  background-color: #ff6f61;
-  color: #fff !important;
-}
-
-.subcategories {
-  display: none;
-  position: absolute; /* Ensure it's positioned relative to its parent */
-  top: 100%;
-  left: 0;
-  min-width: 200px;
-  z-index: 1000;
-  border-radius: 8px;
-  background-color: #fff; /* Ensure background is white */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add subtle shadow for depth */
-}
-
-.list-inline-item:hover .subcategories {
-  display: block;
-}
-
-.subcategories li {
-  margin: 5px 0;
-}
-
-.subcategories a:hover {
-  color: #ff6f61 !important;
-}
-
-.hover-bg:hover {
-  background-color: #f8f9fa;
-  color: #ff6f61 !important;
-}
-
-/* Ensure the overall alignment of the list items (category + links) */
-.category-header .list-inline {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.category-header .list-inline-item {
-  display: flex;
-  align-items: center;
-  margin: 0 10px; /* Space between list items */
-}
-
-.category-header .list-inline-item a {
-  display: inline-block;
-  padding: 10px 15px;
-}
-
-.category-header .category-link, 
-.category-header .list-inline-item a {
-  text-align: center;
-  margin-bottom: 0;
-}
-
-
+    border-bottom: 1px solid #e0e0e0;
+    background-color: #f8f9fa;
+  }
+  .category-link {
+    padding: 8px 12px;
+    display: inline-block;
+    transition: all 0.3s ease;
+  }
+  .category-link:hover {
+    background-color: #ff6f61;
+    color: #fff !important;
+  }
+  .subcategories {
+    display: none;
+    position: absolute; /* Ensure it's positioned relative to its parent */
+    top: 100%;
+    left: 0;
+    min-width: 200px;
+    z-index: 1000;
+    border-radius: 8px;
+    background-color: #fff; /* Ensure background is white */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add subtle shadow for depth */
+  }
+  .list-inline-item:hover .subcategories {
+    display: block;
+  }
+  .subcategories li {
+    margin: 5px 0;
+  }
+  .subcategories a:hover {
+    color: #ff6f61 !important;
+  }
+  .hover-bg:hover {
+    background-color: #f8f9fa;
+    color: #ff6f61 !important;
+  }
+  /* Ensure the overall alignment of the list items (category + links) */
+  .category-header .list-inline {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .category-header .list-inline-item {
+    display: flex;
+    align-items: center;
+    margin: 0 10px; /* Space between list items */
+  }
+  .category-header .list-inline-item a {
+    display: inline-block;
+    padding: 10px 15px;
+  }
+  .category-header .category-link, 
+  .category-header .list-inline-item a {
+    text-align: center;
+    margin-bottom: 0;
+  }
   
   /* Product Card */
-/* Product Card Adjustments */
-.product-card { 
-  background: transparent; 
-  border: none; 
-  transition: transform 0.2s ease; 
-  width: 90%; 
-  margin: 0 auto; 
-}
-
-.product-card:hover { 
-  transform: translateY(-3px); 
-}
-
-/* Image Wrapper */
-.pc__img-wrapper { 
-  overflow: hidden; 
-  border-radius: 8px; 
-  position: relative; 
-}
-
-/* Primary & Secondary Image */
-.pc__img { 
-  width: 100%; 
-  height: 100%; 
-  object-fit: contain;  /* Improved scaling */
-  border-radius: 8px; 
-  transition: transform 0.3s ease; 
-  image-rendering: crisp-edges; /* Enhances image sharpness */
-}
-
-/* Hover Effect */
-.product-card:hover .pc__img { 
-  transform: scale(1.05); 
-}
-
-.secondary-img { 
-  position: absolute; 
-  top: 0; 
-  left: 0; 
-  opacity: 0; 
-  transition: opacity 0.3s ease; 
-  width: 100%; 
-  height: 100%; 
-  object-fit: cover; 
-  border-radius: 8px; 
-  image-rendering: crisp-edges; 
-}
-
-/* Hover Swap Effect */
-.pc__img-wrapper:hover .primary-img { 
-  opacity: 0; 
-}
-
-.pc__img-wrapper:hover .secondary-img { 
-  opacity: 1; 
-}
-
-  
+  /* Product Card Adjustments */
+  .product-card { 
+    background: transparent; 
+    border: none; 
+    transition: transform 0.2s ease; 
+    width: 90%; 
+    margin: 0 auto; 
+  }
+  .product-card:hover { 
+    transform: translateY(-3px); 
+  }
+  /* Image Wrapper */
+  .pc__img-wrapper { 
+    overflow: hidden; 
+    border-radius: 8px; 
+    position: relative; 
+  }
+  /* Primary & Secondary Image */
+  .pc__img { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: contain;  /* Improved scaling */
+    border-radius: 8px; 
+    transition: transform 0.3s ease; 
+    image-rendering: crisp-edges; /* Enhances image sharpness */
+  }
+  /* Hover Effect */
+  .product-card:hover .pc__img { 
+    transform: scale(1.05); 
+  }
+  .secondary-img { 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    opacity: 0; 
+    transition: opacity 0.3s ease; 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; 
+    border-radius: 8px; 
+    image-rendering: crisp-edges; 
+  }
+  /* Hover Swap Effect */
+  .pc__img-wrapper:hover .primary-img { 
+    opacity: 0; 
+  }
+  .pc__img-wrapper:hover .secondary-img { 
+    opacity: 1; 
+  }
   .pc__atc { font-size: 0.875rem; padding: 0.375rem 0.75rem; opacity: 0; transition: opacity 0.3s ease, background-color 0.3s ease; }
   .product-card:hover .pc__atc { opacity: 1; }
   .pc__btn-wl { opacity: 0; transition: opacity 0.3s ease; }
@@ -150,6 +128,20 @@
   .filter-section .form-select { border-radius: 8px; border: 1px solid #e0e0e0; padding: 10px; font-size: 14px; transition: all 0.3s ease; }
   .filter-section .form-select:hover { border-color: #ff6f61; }
   .filter-section .form-select:focus { border-color: #ff6f61; box-shadow: 0 0 0 2px rgba(255, 111, 97, 0.2); }
+
+  /* Sold Out Badge Style */
+  .sold-out-badge {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: #ff9800;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 5px;
+    z-index: 10;
+  }
 </style>
 
 <!-- Category Header -->
@@ -259,23 +251,28 @@
                $secondaryImages = explode(',', $product->images);
               @endphp
               @if(!empty($secondaryImages[0]))
-                <img loading="lazy" src="{{ asset('uploads/products') }}/{{($secondaryImages[0]) }}" 
+                <img loading="lazy" src="{{ asset('uploads/products') }}/{{ $secondaryImages[0] }}" 
                 width="330" height="400" alt="{{ $product->name }}" 
-                 class="pc__img pc__img-second">
+                class="pc__img pc__img-second">
               @endif
             </a>
-            @if(Cart::instance("cart")->content()->where('id', $product->id)->count() > 0)
-              <a href="{{ route('cart.index') }}" class="pc__atc btn btn-sm btn-outline-dark position-absolute bottom-0 start-50 translate-middle-x mb-2">
-                Go to Cart
-              </a>
-            @else
-              <form name="addtocart-form" method="POST" action="{{ route('cart.add') }}">
-                @csrf
-                <input type="hidden" name="id" value="{{ $product->id }}" />
-                <input type="hidden" name="name" value="{{ $product->name }}" />
-                <input type="hidden" name="quantity" value="1" />
-                <input type="hidden" name="price" value="{{ $product->sale_price == '' ? $product->regular_price : $product->sale_price }}" />
-              </form>
+            @if($product->quantity <= 0)
+              <div class="sold-out-badge">Sold Out</div>
+            @endif
+            @if($product->quantity > 0)
+              @if(Cart::instance("cart")->content()->where('id', $product->id)->count() > 0)
+                <a href="{{ route('cart.index') }}" class="pc__atc btn btn-sm btn-outline-dark position-absolute bottom-0 start-50 translate-middle-x mb-2">
+                  Go to Cart
+                </a>
+              @else
+                <form name="addtocart-form" method="POST" action="{{ route('cart.add') }}">
+                  @csrf
+                  <input type="hidden" name="id" value="{{ $product->id }}" />
+                  <input type="hidden" name="name" value="{{ $product->name }}" />
+                  <input type="hidden" name="quantity" value="1" />
+                  <input type="hidden" name="price" value="{{ $product->sale_price == '' ? $product->regular_price : $product->sale_price }}" />
+                </form>
+              @endif
             @endif
           </div>
           <div class="card-body px-0 pb-0">

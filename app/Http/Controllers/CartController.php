@@ -67,21 +67,31 @@ class CartController extends Controller
     
 
     // Increase the quantity of an item in the cart
-    public function increase_item_quantity($rowId)
+    public function updateQuantity(Request $request)
     {
-        $product = Cart::instance('cart')->get($rowId);
-        $qty = $product->qty + 1;
-        Cart::instance('cart')->update($rowId, $qty);
-        return redirect()->back();
-    }
-
-    // Reduce the quantity of an item in the cart
-    public function reduce_item_quantity($rowId)
-    {
-        $product = Cart::instance('cart')->get($rowId);
-        $qty = $product->qty - 1;
-        Cart::instance('cart')->update($rowId, $qty);
-        return redirect()->back();
+        $request->validate([
+            'rowId' => 'required',
+            'quantity' => 'required|integer|min:1'
+        ]);
+    
+        $cartItem = Cart::instance('cart')->get($request->rowId);
+        $product = Product::find($cartItem->id);
+    
+        if ($product->quantity < $request->quantity) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sorry, only ' . $product->quantity . ' items are available in stock.'
+            ]);
+        }
+    
+        Cart::instance('cart')->update($request->rowId, $request->quantity);
+        $this->calculateDiscounts();
+    
+        return response()->json([
+            'success' => true,
+            'subtotal' => Cart::instance('cart')->get($request->rowId)->subtotal(),
+            'totals' => view('partials.cart-totals')->render()
+        ]);
     }
 
     // Remove an item from the cart

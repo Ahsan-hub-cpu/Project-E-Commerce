@@ -59,6 +59,9 @@ Route::get('/terms-condition', function () {
 })->name('terms.condition');
 
 
+Route::put('/cart/update-quantity', [CartController::class, 'updateQuantity'])->name('cart.update.quantity');
+
+
 Route::get('/search',[HomeController::class,'search'])->name('home.search');
 
     Route::get('/account-dashboard',[UserController::class,'index'])->name('user.index');

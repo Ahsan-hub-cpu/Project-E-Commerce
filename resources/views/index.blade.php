@@ -213,7 +213,7 @@
               "1200": { "slidesPerView": 4, "slidesPerGroup": 1, "spaceBetween": 30 }
             }
           }'>
-            <!-- <div class="swiper-wrapper">
+            <div class="swiper-wrapper">
               @foreach($newArrivals as $product)
                 <div class="swiper-slide product-card product-card_style3">
                   <div class="pc__img-wrapper">
@@ -235,7 +235,7 @@
                   </div>
                 </div>
               @endforeach
-            </div> -->
+            </div>
           </div>
         </div>
       </div>

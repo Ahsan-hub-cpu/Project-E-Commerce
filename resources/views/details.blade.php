@@ -40,6 +40,7 @@
   <div class="mb-md-1 pb-md-3"></div>
   <section class="product-single container">
     <div class="row">
+      <!-- Product Images Section -->
       <div class="col-lg-7">
         <div class="product-single__media" data-media-type="vertical-thumbnail">
           <div class="product-single__image">
@@ -92,6 +93,7 @@
           </div>
         </div>
       </div>
+      <!-- Product Details Section -->
       <div class="col-lg-5">
         <div class="d-flex justify-content-between mb-4 pb-md-2">
           <div class="breadcrumb mb-0 d-none d-md-block flex-grow-1">
@@ -100,9 +102,10 @@
             <a href="#" class="menu-link menu-link_us-s text-uppercase fw-medium">The Shop</a>
           </div>
           <div class="product-single__prev-next d-flex align-items-center justify-content-between justify-content-md-end flex-grow-1">
+            <!-- Navigation if needed -->
           </div>
         </div>
-        <h1 class="product-single__name">"{{ $product->name }}"</h1>
+        <h1 class="product-single__name">{{ $product->name }}</h1>
         <div class="product-single__rating">
           <!-- Add rating display if available -->
         </div>
@@ -127,24 +130,37 @@
           @else
             <form name="addtocart-form" method="POST" action="{{ route('cart.add') }}">
               @csrf
+              <!-- Size Options -->
               <div class="product-single__options">
                 <label for="size">Size:</label>
                 <select name="size_id" id="size" class="form-control" required>
                   <option value="">Select Size</option>
-                  @foreach($product->sizes as $size)
-                    <option value="{{ $size->id }}">{{ $size->name }}</option>
-                  @endforeach
+                  @if($product->productVariations && $product->productVariations->count() > 0)
+                    @foreach($product->productVariations as $variation)
+                      <option value="{{ $variation->size->id }}" data-quantity="{{ $variation->quantity }}">
+                        {{ $variation->size->name }} ({{ $variation->quantity }} available)
+                      </option>
+                    @endforeach
+                  @else
+                    <option value="" disabled>No sizes available</option>
+                  @endif
                 </select>
+                @error('size_id')
+                  <div class="text-danger mt-1">{{ $message }}</div>
+                @enderror
               </div>
+              <!-- Quantity Input -->
               <div class="product-single__addtocart">
                 <div class="qty-control position-relative">
-                  <!-- The input has a max attribute based on available quantity -->
                   <input type="number" name="quantity" value="1" min="1" max="{{ $product->quantity }}" class="qty-control__number text-center">
                   <div class="qty-control__reduce">-</div>
                   <div class="qty-control__increase">+</div>
-                </div><!-- .qty-control -->
-                <!-- Container for error message -->
-                <div class="qty-error"></div>
+                </div>
+                <div class="qty-error">
+                  @error('quantity')
+                    <span class="text-danger">{{ $message }}</span>
+                  @enderror
+                </div>
                 <input type="hidden" name="id" value="{{ $product->id }}" />
                 <input type="hidden" name="name" value="{{ $product->name }}" />
                 <input type="hidden" name="price" value="{{ $product->sale_price == '' ? $product->regular_price : $product->sale_price }}" />
@@ -197,6 +213,7 @@
           </div>
         </div>
       </div>
+      <!-- Product Details Tabs -->
       <div class="product-single__details-tab">
         <ul class="nav nav-tabs" id="myTab" role="tablist">
           <li class="nav-item" role="presentation">
@@ -209,11 +226,11 @@
               {{ $product->description }}
             </div>
           </div>
-          <!-- Additional tabs can be added here -->
         </div>
       </div>
     </div>
   </section>
+  <!-- Related Products Carousel -->
   <section class="products-carousel container">
     <h2 class="h3 text-uppercase mb-4 pb-xl-2 mb-xl-4">Related <strong>Products</strong></h2>
     <div id="related_products" class="position-relative">
@@ -322,61 +339,69 @@
 @push('scripts')
 <script>
 $(document).ready(function(){
-  // Set the maximum quantity from the database
-  var maxQuantity = {{ $product->quantity }};
+  // Set the global maximum quantity as fallback (global product quantity)
+  var globalMaxQuantity = {{ $product->quantity }};
   
-  // Function to update the Add to Cart button disabled state
-  function updateSubmitButton($input) {
-    var currentVal = parseInt($input.val());
-    var $button = $input.closest('form').find('button[type=submit]');
-    if(currentVal > maxQuantity){
-      $button.prop('disabled', true);
-    } else {
-      $button.prop('disabled', false);
-    }
-  }
+  // When a size is selected, update the maximum quantity on the quantity input
+  $('#size').on('change', function() {
+      var selectedOption = $(this).find('option:selected');
+      var availableQuantity = selectedOption.data('quantity');
+      if(availableQuantity === undefined || availableQuantity === null) {
+          availableQuantity = globalMaxQuantity;
+      }
+      // Set the max attribute on the quantity input based on available quantity for the selected size
+      $('input.qty-control__number').attr('max', availableQuantity);
+      
+      // If current quantity is more than available, adjust it and show error message
+      var currentVal = parseInt($('input.qty-control__number').val());
+      if(currentVal > availableQuantity){
+          $('input.qty-control__number').val(availableQuantity);
+          $('.qty-error').text("Only " + availableQuantity + " items are available.");
+      } else {
+          $('.qty-error').text('');
+      }
+  });
   
   // Increase button handler
   $('.qty-control__increase').on('click', function(){
-    var $input = $(this).siblings('input.qty-control__number');
-    var currentVal = parseInt($input.val());
-    var $error = $(this).closest('.qty-control').siblings('.qty-error');
-    if(currentVal < maxQuantity){
-      $input.val(currentVal);
-      $error.text(''); // Clear error
-    } else {
-      $error.text("Only " + maxQuantity + " items are available.");
-    }
-    updateSubmitButton($input);
+      var $input = $(this).siblings('input.qty-control__number');
+      var currentVal = parseInt($input.val());
+      var maxVal = parseInt($input.attr('max'));
+      var $error = $(this).closest('.qty-control').siblings('.qty-error');
+      if(currentVal < maxVal){
+          $input.val(currentVal + 1);
+          $error.text('');
+      } else {
+          $error.text("Only " + maxVal + " items are available.");
+      }
   });
   
   // Decrease button handler
   $('.qty-control__reduce').on('click', function(){
-    var $input = $(this).siblings('input.qty-control__number');
-    var currentVal = parseInt($input.val());
-    var $error = $(this).closest('.qty-control').siblings('.qty-error');
-    if(currentVal > 1){
-      $input.val(currentVal);
-      $error.text(''); // Clear error if any
-    }
-    updateSubmitButton($input);
+      var $input = $(this).siblings('input.qty-control__number');
+      var currentVal = parseInt($input.val());
+      var $error = $(this).closest('.qty-control').siblings('.qty-error');
+      if(currentVal > 1){
+          $input.val(currentVal - 1);
+          $error.text('');
+      }
   });
   
-  // Check manual changes to the input field
+  // Manual change to quantity input
   $('input.qty-control__number').on('change', function(){
-    var $input = $(this);
-    var currentVal = parseInt($input.val());
-    var $error = $input.closest('.qty-control').siblings('.qty-error');
-    if(currentVal > maxQuantity){
-      $error.text("Only " + maxQuantity + " items are available.");
-      $input.val(maxQuantity);
-    } else {
-      $error.text('');
-    }
-    if(currentVal < 1 || isNaN(currentVal)){
-      $input.val(1);
-    }
-    updateSubmitButton($input);
+      var $input = $(this);
+      var currentVal = parseInt($input.val());
+      var maxVal = parseInt($input.attr('max'));
+      var $error = $input.closest('.qty-control').siblings('.qty-error');
+      if(currentVal > maxVal){
+          $error.text("Only " + maxVal + " items are available.");
+          $input.val(maxVal);
+      } else {
+          $error.text('');
+      }
+      if(currentVal < 1 || isNaN(currentVal)){
+          $input.val(1);
+      }
   });
 });
 </script>

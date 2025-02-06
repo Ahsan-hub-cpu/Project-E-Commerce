@@ -1,5 +1,4 @@
 @extends('layouts.app')
-
 @section('content')
 <style>
     .cart-totals td {
@@ -63,7 +62,7 @@
                                 <tr>
                                     <td>
                                         <div class="shopping-cart__product-item">
-                                            <img loading="lazy" src="{{ asset('uploads/products/thumbnails') }}/{{ $cartItem->model->image }}" width="120" height="120" alt="" />
+                                            <img loading="lazy" src="{{ asset('uploads/products/thumbnails/' . $cartItem->model->image) }}" width="120" height="120" alt="" />
                                         </div>
                                     </td>
                                     <td>
@@ -80,7 +79,14 @@
                                     </td>
                                     <td>
                                         <div class="qty-control position-relative">
-                                            <input type="number" name="quantity" value="{{ $cartItem->qty }}" min="1" class="qty-control__number text-center" data-rowid="{{ $cartItem->rowId }}">
+                                            <!-- Each input gets data attributes for available and global quantities -->
+                                            <input type="number" name="quantity" 
+                                                   value="{{ $cartItem->qty }}" 
+                                                   min="1" 
+                                                   class="qty-control__number text-center" 
+                                                   data-rowid="{{ $cartItem->rowId }}"
+                                                   data-max="{{ $cartItem->options->available_quantity }}"
+                                                   data-global="{{ $cartItem->options->global_quantity }}">
                                             <button class="qty-control__reduce" data-action="reduce" data-rowid="{{ $cartItem->rowId }}">-</button>
                                             <button class="qty-control__increase" data-action="increase" data-rowid="{{ $cartItem->rowId }}">+</button>
                                         </div>
@@ -212,57 +218,117 @@
 
 @push('scripts')
 <script>
-    $(document).ready(function() {
-
-        $('.qty-control__reduce, .qty-control__increase').on('click', function(e) {
-            e.preventDefault();
-            const action = $(this).data('action');
-            const rowId = $(this).data('rowid');
-            const input = $(`input[data-rowid="${rowId}"]`);
-            let quantity = parseInt(input.val());
-            console.log(quantity)
-
-            if (action === 'reduce' && quantity > 1) {
-                quantity--;
-            } else if (action === 'increase') {
-                quantity++;
-            }
-
-            updateQuantity(rowId, quantity);
-        });
-
-        // Handle manual input changes
-        $('.qty-control__number').on('change', function() {
-            const rowId = $(this).data('rowid');
-            const quantity = parseInt($(this).val());
-            updateQuantity(rowId, quantity);
-        });
-
-        // AJAX function to update quantity
-        function updateQuantity(rowId, quantity) {
-            $.ajax({
-                url: "{{ route('cart.update.quantity') }}",
-                method: 'PUT',
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    rowId: rowId,
-                    quantity: quantity
-                },
-                success: function(response) {
-                    if (response.success) {
-                        // Update subtotal and totals
-                        $(`#subtotal-${rowId}`).text('PKR ' + response.subtotal);
-                        $('.cart-totals').html(response.totals);
-                    } else {
-                        // Show stock error
-                        $(`#stock-error-${rowId}`).text(response.message);
-                    }
-                },
-                error: function(xhr) {
-                    alert('An error occurred. Please try again.');
-                }
-            });
+$(document).ready(function(){
+    // For each quantity input in the cart, set its max value as the minimum of the available (variation) and global product quantities.
+    $('input.qty-control__number').each(function(){
+        var $input = $(this);
+        var availableQuantity = parseInt($input.data('max'));   // Available from variation
+        var globalQuantity = parseInt($input.data('global'));     // Global product stock
+        var allowedMax = Math.min(availableQuantity, globalQuantity);
+        $input.attr('max', allowedMax);
+    });
+    
+    // When a size is changed on the details page (if applicable), update the max attribute accordingly.
+    $('#size').on('change', function() {
+        var selectedOption = $(this).find('option:selected');
+        var availableQuantity = parseInt(selectedOption.data('quantity'));
+        // Use global quantity as fallback if availableQuantity is not defined
+        var globalQuantity = parseInt($('input.qty-control__number').data('global'));
+        if(isNaN(availableQuantity)) {
+            availableQuantity = globalQuantity;
+        }
+        var allowedMax = Math.min(availableQuantity, globalQuantity);
+        $('input.qty-control__number').attr('max', allowedMax);
+      
+        // If current quantity is more than allowed, adjust it and show an error.
+        var currentVal = parseInt($('input.qty-control__number').val());
+        if(currentVal > allowedMax){
+            $('input.qty-control__number').val(allowedMax);
+            $('.qty-error').text("Only " + allowedMax + " items are available.");
+        } else {
+            $('.qty-error').text('');
         }
     });
+    
+    // Increase button handler
+    $('.qty-control__increase').on('click', function(){
+        var $input = $(this).siblings('input.qty-control__number');
+        var currentVal = parseInt($input.val());
+        var maxVal = parseInt($input.attr('max'));
+        var $error = $(this).closest('.qty-control').siblings('.qty-error');
+        if(currentVal < maxVal){
+            $input.val(currentVal + 1);
+            $error.text('');
+        } else {
+            $error.text("Only " + maxVal + " items are available.");
+        }
+    });
+    
+    // Decrease button handler
+    $('.qty-control__reduce').on('click', function(){
+        var $input = $(this).siblings('input.qty-control__number');
+        var currentVal = parseInt($input.val());
+        var $error = $(this).closest('.qty-control').siblings('.qty-error');
+        if(currentVal > 1){
+            $input.val(currentVal - 1);
+            $error.text('');
+        }
+    });
+    
+    // Manual change to quantity input
+    $('input.qty-control__number').on('change', function(){
+        var $input = $(this);
+        var currentVal = parseInt($input.val());
+        var maxVal = parseInt($input.attr('max'));
+        var $error = $input.closest('.qty-control').siblings('.qty-error');
+        if(currentVal > maxVal){
+            $error.text("Only " + maxVal + " items are available.");
+            $input.val(maxVal);
+        } else {
+            $error.text('');
+        }
+        if(currentVal < 1 || isNaN(currentVal)){
+            $input.val(1);
+        }
+    });
+    
+    // AJAX update for cart quantity changes
+    $('input.qty-control__number').on('change', function() {
+        var rowId = $(this).data('rowid');
+        var quantity = parseInt($(this).val());
+        updateQuantity(rowId, quantity);
+    });
+    
+    // Increase/Decrease buttons AJAX update
+    $('.qty-control__increase, .qty-control__reduce').on('click', function(e) {
+        var rowId = $(this).data('rowid');
+        var quantity = parseInt($(`input[data-rowid="${rowId}"]`).val());
+        updateQuantity(rowId, quantity);
+    });
+    
+    function updateQuantity(rowId, quantity) {
+        $.ajax({
+            url: "{{ route('cart.update.quantity') }}",
+            method: 'PUT',
+            data: {
+                _token: "{{ csrf_token() }}",
+                rowId: rowId,
+                quantity: quantity
+            },
+            success: function(response) {
+                if(response.success) {
+                    $(`input[data-rowid="${rowId}"]`).val(response.newQuantity);
+                    $(`#subtotal-${rowId}`).text('PKR ' + response.subtotal);
+                    $('.cart-totals').html(response.totals);
+                } else {
+                    $(`#stock-error-${rowId}`).text(response.message);
+                }
+            },
+            error: function(xhr) {
+                alert('An error occurred. Please try again.');
+            }
+        });
+    }
+});
 </script>
 @endpush

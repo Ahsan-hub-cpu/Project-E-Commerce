@@ -184,18 +184,26 @@
                     </div>
 
                     <fieldset class="sizes">
-                        <div class="body-title mb-10">Sizes <span class="tf-color-1">*</span></div>
-                        <div class="checkbox-group">
-                            @foreach ($sizes as $size)
-                                <label>
-                                    <input type="checkbox" name="sizes[]" value="{{ $size->id }}" 
-                                    @if(in_array($size->id, old('sizes', $product->sizes->pluck('id')->toArray()))) checked @endif>
-                                    {{ $size->name }}
-                                </label>
-                            @endforeach
-                        </div>
-                    </fieldset>
-                    @error("sizes") <span class="alert alert-danger text-center">{{$message}}</span> @enderror
+            <div class="body-title mb-10">Sizes & Stock Quantity</div>
+            <div class="checkbox-group">
+                @foreach ($sizes as $size)
+                    @php
+                        // Check if the product already has a variation for the current size
+                        $variation = $product->productVariations->where('size_id', $size->id)->first();
+                        $stockQuantity = $variation ? $variation->quantity : '';
+                    @endphp
+                    <div class="size-item">
+                        <label>
+                            <input type="checkbox" name="sizes[]" value="{{ $size->id }}" 
+                            @if($variation) checked @endif>
+                            {{ $size->name }}
+                        </label>
+                        <input type="number" name="size_stock[{{ $size->id }}]" placeholder="Stock Quantity" 
+                               class="size-stock-input" value="{{ $stockQuantity }}">
+                    </div>
+                @endforeach
+            </div>
+        </fieldset>
 
                     <div class="cols gap10">
                         <button class="tf-button w-full" type="submit">Save product</button>
@@ -245,6 +253,16 @@
             $.each(gphotos,function(key,val){
                 $("#galUpload").prepend(`<div class="item gitems"><img src="${URL.createObjectURL(val)}" alt=""></div>`);
             });
+        });
+
+
+        $("input[name='sizes[]']").on("change", function() {
+            var stockInput = $(this).closest(".size-item").find(".size-stock-input");
+            if ($(this).is(":checked")) {
+                stockInput.prop("disabled", false);
+            } else {
+                stockInput.prop("disabled", true).val('');
+            }
         });
 
         // Auto generate slug

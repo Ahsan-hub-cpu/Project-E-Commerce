@@ -261,212 +261,205 @@ public function delete_category($id) {
 
 // ---- Product Methods ---- //
 
-public function products() {
-    $products = Product::with(['productVariations.size'])->orderBy('created_at','DESC')->paginate(10);
-    return view('admin.products', compact('products'));
-}
 
-public function add_product() {
-    $categories = Category::with('subcategories')->orderBy('name')->get();
-    $brands = Brand::select('id', 'name')->orderBy('name')->get();
-    $sizes = Sizes::all();  
-    return view("admin.product-add", compact('categories', 'brands', 'sizes'));
-}
-
-public function product_store(Request $request) {
-    $request->validate([
-        'name' => 'required',
-        'slug' => 'required|unique:products,slug',
-        'category_id' => 'required',
-        'brand_id' => 'required',
-        'short_description' => 'required',
-        'description' => 'required',
-        'regular_price' => 'required',
-        'sale_price' => 'nullable',
-        'SKU' => 'required',
-        'stock_status' => 'required',
-        'featured' => 'required',
-        'quantity' => 'required',
-        'image' => 'required|mimes:png,jpg,jpeg,avif|max:4048',
-        'sizes' => 'required|array',
-        'subcategory_id' => 'required'
-    ]);
-
-    $product = new Product();
-    $product->name = $request->name;
-    $product->slug = Str::slug($request->name);
-    $product->short_description = $request->short_description;
-    $product->description = $request->description;
-    $product->regular_price = $request->regular_price;
-    $product->sale_price = $request->sale_price;
-    $product->SKU = $request->SKU;
-    $product->stock_status = $request->stock_status;
-    $product->featured = $request->featured;
-    $product->quantity = $request->quantity;
-    $product->category_id = $request->category_id;
-    $product->subcategory_id = $request->subcategory_id;  // Store subcategory_id
-
-    $current_timestamp = Carbon::now()->timestamp;
-
-    // Handle Product Image
-    if ($request->hasFile('image')) {        
-        $image = $request->file('image');
-        $imageName = $current_timestamp . '.' . $image->extension();
-        $this->GenerateThumbnailImage($image, $imageName);            
-        $product->image = $imageName;
+    public function products() {
+        $products = Product::with(['productVariations.size'])->orderBy('created_at', 'DESC')->paginate(10);
+        return view('admin.products', compact('products'));
     }
 
-    // Handle Gallery Images
-    $gallery_arr = [];
-    if ($request->hasFile('images')) {
-        $allowedfileExtension = ['jpg', 'png', 'jpeg', 'avif'];
-        $files = $request->file('images');
-        foreach ($files as $index => $file) {
-            $extension = $file->getClientOriginalExtension();                                 
-            if (in_array($extension, $allowedfileExtension)) {
-                $filename = $current_timestamp . "-" . ($index + 1) . "." . $extension;   
-                $this->GenerateThumbnailImage($file, $filename);                    
-                $gallery_arr[] = $filename;
-            }
-        }
-        $product->images = implode(',', $gallery_arr);
+    public function add_product() {
+        $categories = Category::with('subcategories')->orderBy('name')->get();
+        $brands = Brand::select('id', 'name')->orderBy('name')->get();
+        $sizes = Sizes::all();
+        return view("admin.product-add", compact('categories', 'brands', 'sizes'));
     }
 
-    $product->brand_id = $request->brand_id;
-    $product->save();
-
-    // Store product variations (combinations of size & color)
-    foreach ($request->sizes as $size) {
-        Product_Variations::create([
-            'product_id' => $product->id,
-            'size_id' => $size,
-            'price' => $request->regular_price, // Default price, can be customized later
-            'quantity' => $request->quantity, // Default stock for each variation
+    public function product_store(Request $request) {
+        // Validate the data
+        $request->validate([
+            'name' => 'required',
+            'slug' => 'required|unique:products,slug',
+            'category_id' => 'required',
+            'brand_id' => 'required',
+            'short_description' => 'required',
+            'description' => 'required',
+            'regular_price' => 'required',
+            'sale_price' => 'nullable',
+            'SKU' => 'required',
+            'stock_status' => 'required',
+            'featured' => 'required',
+            'quantity' => 'required',
+            'image' => 'required|mimes:png,jpg,jpeg,avif|max:4048',
+            'sizes' => 'required|array',
+            'size_stock' => 'required|array', // Ensure size_stock is an array
+            'subcategory_id' => 'required',
         ]);
+    
+        // Calculate total quantity from sizes
+        $totalSizeQuantity = array_sum($request->size_stock);
+    
+        // Check if global quantity matches total size quantity
+        if ($totalSizeQuantity != $request->quantity) {
+            return back()->withErrors(['quantity' => 'The global quantity must match the sum of the quantities of each size.']);
+        }
+    
+        // Create the product
+        $product = new Product();
+        $product->name = $request->name;
+        $product->slug = Str::slug($request->name);
+        $product->short_description = $request->short_description;
+        $product->description = $request->description;
+        $product->regular_price = $request->regular_price;
+        $product->sale_price = $request->sale_price;
+        $product->SKU = $request->SKU;
+        $product->stock_status = $request->stock_status;
+        $product->featured = $request->featured;
+        $product->quantity = $request->quantity; // Global quantity
+        $product->category_id = $request->category_id;
+        $product->subcategory_id = $request->subcategory_id;
+    
+        // Handle image upload (existing logic)
+        $current_timestamp = Carbon::now()->timestamp;
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imageName = $current_timestamp . '.' . $image->extension();
+            $this->GenerateThumbnailImage($image, $imageName);
+            $product->image = $imageName;
+        }
+    
+        // Handle gallery images (existing logic)
+        $gallery_arr = [];
+        if ($request->hasFile('images')) {
+            $allowedfileExtension = ['jpg', 'png', 'jpeg', 'avif'];
+            $files = $request->file('images');
+            foreach ($files as $index => $file) {
+                $extension = $file->getClientOriginalExtension();
+                if (in_array($extension, $allowedfileExtension)) {
+                    $filename = $current_timestamp . "-" . ($index + 1) . "." . $extension;
+                    $this->GenerateThumbnailImage($file, $filename);
+                    $gallery_arr[] = $filename;
+                }
+            }
+            $product->images = implode(',', $gallery_arr);
+        }
+    
+        $product->brand_id = $request->brand_id;
+        $product->save();
+    
+        // Save product variations (size and stock quantity)
+        foreach ($request->sizes as $size_id) {
+            Product_Variations::create([
+                'product_id' => $product->id,
+                'size_id' => $size_id,
+                'price' => $request->regular_price,
+                'quantity' => $request->size_stock[$size_id], // Quantity from the size_stock array
+            ]);
+        }
+    
+        return redirect()->route('admin.products')->with('status', 'Product added successfully!');
+    }
+    
+    
+
+    public function edit_product($id) {
+        $product = Product::find($id);
+        $categories = Category::with('subcategories')->orderBy('name')->get();
+        $brands = Brand::select('id', 'name')->orderBy('name')->get();
+        $sizes = Sizes::all();
+        $productVariations = Product_Variations::where('product_id', $product->id)->get();
+        $selectedCategory = $product->category;
+        $selectedSubcategory = $product->subcategory;
+
+        return view('admin.product-edit', compact('product', 'categories', 'brands', 'sizes', 'productVariations', 'selectedCategory', 'selectedSubcategory'));
     }
 
-    return redirect()->route('admin.products')->with('status', 'Product added successfully!');
-}
-
-public function edit_product($id) {
-    $product = Product::find($id);
-    $categories = Category::with('subcategories')->orderBy('name')->get();
-    $brands = Brand::select('id', 'name')->orderBy('name')->get();
-    $sizes = Sizes::all();
-    $productVariations = Product_Variations::where('product_id', $product->id)->get();
-    $selectedCategory = $product->category;
-    $selectedSubcategory = $product->subcategory;
-
-    return view('admin.product-edit', compact('product', 'categories', 'brands', 'sizes', 'productVariations', 'selectedCategory', 'selectedSubcategory'));
-}
-
-public function update_product(Request $request) {
-    $request->validate([
-        'name' => 'required',
-        'slug' => 'required|unique:products,slug,' . $request->id,
-        'category_id' => 'required',
-        'subcategory_id' => 'required',  // Ensure subcategory_id is validated
-        'brand_id' => 'required',
-        'short_description' => 'required',
-        'description' => 'required',
-        'regular_price' => 'required',
-        'sale_price' => 'nullable',
-        'SKU' => 'required',
-        'stock_status' => 'required',
-        'featured' => 'required',
-        'quantity' => 'required',
-        'image' => 'nullable|mimes:png,jpg,jpeg|max:2048',
-        'sizes' => 'required|array',
-    ]);
-
-    $product = Product::findOrFail($request->id);
-    $product->name = $request->name;
-    $product->slug = Str::slug($request->name);
-    $product->short_description = $request->short_description;
-    $product->description = $request->description;
-    $product->regular_price = $request->regular_price;
-    $product->sale_price = $request->sale_price;
-    $product->SKU = $request->SKU;
-    $product->stock_status = $request->stock_status;
-    $product->featured = $request->featured;
-    $product->quantity = $request->quantity;
-    $product->category_id = $request->category_id;  // Ensure category_id is stored
-    $product->subcategory_id = $request->subcategory_id;  // Store subcategory_id correctly
-
-    $current_timestamp = Carbon::now()->timestamp;
-
-    // Handle Product Image Update
-    if ($request->hasFile('image')) {
-        if (File::exists(public_path('uploads/products/' . $product->image))) {
-            File::delete(public_path('uploads/products/' . $product->image));
+    public function update_product(Request $request)
+    {
+        $request->validate([
+            'name' => 'required',
+            'slug' => 'required|unique:products,slug,' . $request->id,
+            'category_id' => 'required',
+            'subcategory_id' => 'required',
+            'brand_id' => 'required',
+            'short_description' => 'required',
+            'description' => 'required',
+            'regular_price' => 'required',
+            'sale_price' => 'nullable',
+            'SKU' => 'required',
+            'stock_status' => 'required',
+            'featured' => 'required',
+            'quantity' => 'required',
+            'image' => 'nullable|mimes:png,jpg,jpeg|max:2048',
+            'sizes' => 'required|array',
+            'size_stock' => 'required|array', // Ensure size_stock is validated as an array
+        ]);
+    
+        $product = Product::findOrFail($request->id);
+    
+        // Calculate total quantity from sizes
+        $totalSizeQuantity = array_sum($request->size_stock);
+    
+        // Check if global quantity matches total size quantity
+        if ($totalSizeQuantity != $request->quantity) {
+            return back()->withErrors(['quantity' => 'The global quantity must match the sum of the quantities of each size.']);
         }
-        if (File::exists(public_path('uploads/products/thumbnails/' . $product->image))) {
-            File::delete(public_path('uploads/products/thumbnails/' . $product->image));
-        }
-
-        $image = $request->file('image');
-        $imageName = $current_timestamp . '.' . $image->extension();
-        $this->GenerateThumbnailImage($image, $imageName);
-        $product->image = $imageName;
-    }
-
-    // Handle Gallery Images Update
-    $gallery_arr = [];
-    if ($request->hasFile('images')) {
-        foreach (explode(',', $product->images) as $ofile) {
-            if (File::exists(public_path('uploads/products/' . $ofile))) {
-                File::delete(public_path('uploads/products/' . $ofile));
+    
+        // Update product details
+        $product->name = $request->name;
+        $product->slug = Str::slug($request->name);
+        $product->short_description = $request->short_description;
+        $product->description = $request->description;
+        $product->regular_price = $request->regular_price;
+        $product->sale_price = $request->sale_price;
+        $product->SKU = $request->SKU;
+        $product->stock_status = $request->stock_status;
+        $product->featured = $request->featured;
+        $product->quantity = $request->quantity; // Global quantity
+        $product->category_id = $request->category_id;
+        $product->subcategory_id = $request->subcategory_id;
+    
+        // Handle image upload (existing logic)
+        if ($request->hasFile('image')) {
+            if (File::exists(public_path('uploads/products/' . $product->image))) {
+                File::delete(public_path('uploads/products/' . $product->image));
             }
-            if (File::exists(public_path('uploads/products/thumbnails/' . $ofile))) {
-                File::delete(public_path('uploads/products/thumbnails/' . $ofile));
-            }
+    
+            $image = $request->file('image');
+            $imageName = time() . '.' . $image->extension();
+            $this->GenerateThumbnailImage($image, $imageName);
+            $product->image = $imageName;
         }
-
-        $allowedfileExtension = ['jpg', 'png', 'jpeg', 'avif'];
-        $files = $request->file('images');
-        foreach ($files as $index => $file) {
-            $extension = $file->getClientOriginalExtension();
-            if (in_array($extension, $allowedfileExtension)) {
-                $filename = $current_timestamp . "-" . ($index + 1) . "." . $extension;
+    
+        // Handle gallery images (existing logic)
+        if ($request->hasFile('images')) {
+            $gallery_arr = [];
+            foreach ($request->file('images') as $index => $file) {
+                $filename = time() . '-' . ($index + 1) . '.' . $file->extension();
                 $this->GenerateThumbnailImage($file, $filename);
                 $gallery_arr[] = $filename;
             }
+            $product->images = implode(',', $gallery_arr);
         }
-        $product->images = implode(',', $gallery_arr);
+    
+        $product->save();
+    
+        // Update sizes and stock quantities
+        foreach ($request->sizes as $sizeId) {
+            $stockQuantity = $request->size_stock[$sizeId] ?? 0;
+            $product->sizes()->updateExistingPivot($sizeId, ['quantity' => $stockQuantity]);
+        }
+    
+        return redirect()->route('admin.products')->with('success', 'Product updated successfully.');
+    }
+    
+    
+    public function delete_product($id) {
+        $product = Product::find($id);
+        $product->delete();
+        return redirect()->route('admin.products')->with('status', 'Product has been deleted successfully!');
     }
 
-    $product->brand_id = $request->brand_id;
-    $product->save();
 
-    // **Update Product Variations**
-    Product_Variations::where('product_id', $product->id)->delete(); // Delete existing variations
-
-    // Insert new variations based on selected sizes and colors
-    foreach ($request->sizes as $size) {
-        Product_Variations::create([
-            'product_id' => $product->id,
-            'size_id' => $size,
-            'price' => $request->regular_price,
-            'quantity' => $request->quantity,
-        ]);
-    }
-
-    return redirect()->route('admin.products')->with('status', 'Product updated with variations successfully!');
-}
-
-
-public function delete_product($id) {
-    $product = Product::find($id);        
-    if (File::exists(public_path('uploads/products').'/'.$product->image)) {
-        File::delete(public_path('uploads/products').'/'.$product->image);
-    }
-    if (File::exists(public_path('uploads/products/thumbnails').'/'.$product->image)) {
-        File::delete(public_path('uploads/products/thumbnails').'/'.$product->image);
-    }
-    $product->delete();
-    return redirect()->route('admin.products')->with('status','Product has been deleted successfully!');
-}
- 
 
 public function getSubcategories($categoryId)
 {

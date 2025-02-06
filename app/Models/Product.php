@@ -37,6 +37,10 @@ class Product extends Model
 {
     return $this->quantity <= 0;
 }
+public function getTotalQuantityAttribute()
+{
+    return $this->productVariations->sum('quantity');
+}
 
     
 }

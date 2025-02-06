@@ -1,6 +1,17 @@
 @extends('layouts.admin')
 
 @section('content')
+
+@if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
     <!-- main-content-wrap -->
     <div class="main-content-inner">
         <!-- main-content-wrap -->
@@ -193,8 +204,11 @@
                         <div class="checkbox-group">
                             @foreach ($sizes as $size)
                                 <label>
-                                    <input type="checkbox" name="sizes[]" value="{{ $size->id }}"> {{ $size->name }}
-                                </label><br>
+                                    <input type="checkbox" name="sizes[]" value="{{ $size->id }}" class="size-checkbox"> 
+                                    {{ $size->name }}
+                                </label>
+                                <input type="number" name="size_stock[{{$size->id}}]" class="size-stock-input hidden" placeholder="Stock Quantity">
+                                <br>
                             @endforeach
                         </div>
                     </fieldset>
@@ -263,6 +277,15 @@
 
         $("input[name='name']").on("change", function() {
             $("input[name='slug']").val(StringToSlug($(this).val()));
+        });
+
+        $(".size-checkbox").on("change", function() {
+            let stockInput = $(this).closest("label").next(".size-stock-input");
+            if ($(this).is(":checked")) {
+                stockInput.removeClass("hidden").attr("required", true);
+            } else {
+                stockInput.addClass("hidden").val("").removeAttr("required");
+            }
         });
 
         function StringToSlug(Text) {

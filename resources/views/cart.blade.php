@@ -70,7 +70,22 @@
                                             <h4>{{ $cartItem->name }}</h4>
                                             <ul class="shopping-cart__product-item__options">
                                                 <li>Color: {{ ucfirst($cartItem->options['color'] ?? 'N/A') }}</li>
-                                                <li>Size: {{ strtoupper($cartItem->options['size'] ?? 'N/A') }}</li>
+                                                <li>
+                                                    Size:
+                                                    @if(isset($cartItem->model->availableSizes))
+                                                        <select class="size-select" data-rowid="{{ $cartItem->rowId }}">
+                                                            @foreach($cartItem->model->availableSizes as $size => $availableQty)
+                                                                <option value="{{ $size }}"
+                                                                    data-quantity="{{ $availableQty }}"
+                                                                    {{ (strtolower($cartItem->options['size'] ?? '') == strtolower($size)) ? 'selected' : '' }}>
+                                                                    {{ strtoupper($size) }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    @else
+                                                        {{ strtoupper($cartItem->options['size'] ?? 'N/A') }}
+                                                    @endif
+                                                </li>
                                             </ul>
                                         </div>
                                     </td>
@@ -79,7 +94,6 @@
                                     </td>
                                     <td>
                                         <div class="qty-control position-relative">
-                                            <!-- Each input gets data attributes for available and global quantities -->
                                             <input type="number" name="quantity" 
                                                    value="{{ $cartItem->qty }}" 
                                                    min="1" 
@@ -198,7 +212,10 @@
                         </div>
                         <div class="mobile_fixed-btn_wrapper">
                             <div class="button-wrapper container">
-                                <a href="{{ route('cart.checkout') }}" class="btn btn-primary btn-checkout">PROCEED TO CHECKOUT</a>
+                                <!-- Changed from an anchor to a button -->
+                                <button type="button" class="btn btn-primary btn-checkout">PROCEED TO CHECKOUT</button>
+                                <!-- Checkout error will be displayed here -->
+                                <div id="checkout-error" class="text-danger"></div>
                             </div>
                         </div>
                     </div>
@@ -219,93 +236,95 @@
 @push('scripts')
 <script>
 $(document).ready(function(){
-    // For each quantity input in the cart, set its max value as the minimum of the available (variation) and global product quantities.
+
+    // INITIALIZE: For each quantity input, calculate allowed maximum and set a "lastValid" value.
     $('input.qty-control__number').each(function(){
         var $input = $(this);
-        var availableQuantity = parseInt($input.data('max'));   // Available from variation
-        var globalQuantity = parseInt($input.data('global'));     // Global product stock
+        var availableQuantity = parseInt($input.data('max'));
+        var globalQuantity = parseInt($input.data('global'));
         var allowedMax = Math.min(availableQuantity, globalQuantity);
         $input.attr('max', allowedMax);
-    });
-    
-    // When a size is changed on the details page (if applicable), update the max attribute accordingly.
-    $('#size').on('change', function() {
-        var selectedOption = $(this).find('option:selected');
-        var availableQuantity = parseInt(selectedOption.data('quantity'));
-        // Use global quantity as fallback if availableQuantity is not defined
-        var globalQuantity = parseInt($('input.qty-control__number').data('global'));
-        if(isNaN(availableQuantity)) {
-            availableQuantity = globalQuantity;
-        }
-        var allowedMax = Math.min(availableQuantity, globalQuantity);
-        $('input.qty-control__number').attr('max', allowedMax);
-      
-        // If current quantity is more than allowed, adjust it and show an error.
-        var currentVal = parseInt($('input.qty-control__number').val());
-        if(currentVal > allowedMax){
-            $('input.qty-control__number').val(allowedMax);
-            $('.qty-error').text("Only " + allowedMax + " items are available.");
-        } else {
-            $('.qty-error').text('');
-        }
-    });
-    
-    // Increase button handler
-    $('.qty-control__increase').on('click', function(){
-        var $input = $(this).siblings('input.qty-control__number');
         var currentVal = parseInt($input.val());
-        var maxVal = parseInt($input.attr('max'));
-        var $error = $(this).closest('.qty-control').siblings('.qty-error');
-        if(currentVal < maxVal){
-            $input.val(currentVal + 1);
-            $error.text('');
-        } else {
-            $error.text("Only " + maxVal + " items are available.");
+        if(currentVal > allowedMax) {
+            currentVal = allowedMax;
+            $input.val(allowedMax);
         }
+        // Store the current valid quantity using jQuery’s data method.
+        $input.data('lastValid', currentVal);
     });
-    
-    // Decrease button handler
-    $('.qty-control__reduce').on('click', function(){
-        var $input = $(this).siblings('input.qty-control__number');
-        var currentVal = parseInt($input.val());
-        var $error = $(this).closest('.qty-control').siblings('.qty-error');
-        if(currentVal > 1){
-            $input.val(currentVal - 1);
-            $error.text('');
-        }
-    });
-    
-    // Manual change to quantity input
+
+    // Manual change on the input (only bind to "change" event)
     $('input.qty-control__number').on('change', function(){
         var $input = $(this);
-        var currentVal = parseInt($input.val());
+        var rowId = $input.data('rowid');
+        var inputVal = parseInt($input.val());
         var maxVal = parseInt($input.attr('max'));
-        var $error = $input.closest('.qty-control').siblings('.qty-error');
-        if(currentVal > maxVal){
-            $error.text("Only " + maxVal + " items are available.");
+        var $error = $('#stock-error-' + rowId);
+
+        if(inputVal > maxVal) {
+            $error.text("Only " + maxVal + " items are available in this size");
+            inputVal = maxVal;
             $input.val(maxVal);
         } else {
             $error.text('');
         }
-        if(currentVal < 1 || isNaN(currentVal)){
+        if(inputVal < 1 || isNaN(inputVal)) {
+            inputVal = 1;
             $input.val(1);
         }
+        // Update our stored value.
+        $input.data('lastValid', inputVal);
+        updateQuantity(rowId, inputVal);
     });
-    
-    // AJAX update for cart quantity changes
-    $('input.qty-control__number').on('change', function() {
+
+    // Increase button: read the stored "lastValid" value and add 1.
+    $('.qty-control__increase').on('click', function(){
         var rowId = $(this).data('rowid');
-        var quantity = parseInt($(this).val());
-        updateQuantity(rowId, quantity);
+        var $input = $('input.qty-control__number[data-rowid="'+ rowId +'"]');
+        var lastValid = parseInt($input.data('lastValid'));
+        var maxVal = parseInt($input.attr('max'));
+        var $error = $('#stock-error-' + rowId);
+        if(lastValid < maxVal) {
+            var newQuantity = lastValid + 1;
+            $error.text('');
+            updateQuantity(rowId, newQuantity);
+        } else {
+            $error.text("Only " + maxVal + " items are available.");
+        }
     });
-    
-    // Increase/Decrease buttons AJAX update
-    $('.qty-control__increase, .qty-control__reduce').on('click', function(e) {
+
+    // Decrease button: read the stored "lastValid" value and subtract 1.
+    $('.qty-control__reduce').on('click', function(){
         var rowId = $(this).data('rowid');
-        var quantity = parseInt($(`input[data-rowid="${rowId}"]`).val());
-        updateQuantity(rowId, quantity);
+        var $input = $('input.qty-control__number[data-rowid="'+ rowId +'"]');
+        var lastValid = parseInt($input.data('lastValid'));
+        var $error = $('#stock-error-' + rowId);
+        if(lastValid > 1) {
+            var newQuantity = lastValid - 1;
+            $error.text('');
+            updateQuantity(rowId, newQuantity);
+        }
     });
-    
+
+    // Checkout button: prevent navigation if any stock error exists.
+    $('.btn-checkout').on('click', function(e){
+        e.preventDefault();
+        var errorFound = false;
+        $('.stock-error').each(function(){
+            if($.trim($(this).text()).length > 0){
+                errorFound = true;
+                return false;
+            }
+        });
+        if(errorFound) {
+            $('#checkout-error').text("Stock is not available");
+        } else {
+            $('#checkout-error').text("");
+            window.location.href = "{{ route('cart.checkout') }}";
+        }
+    });
+
+    // AJAX function to update quantity on the server.
     function updateQuantity(rowId, quantity) {
         $.ajax({
             url: "{{ route('cart.update.quantity') }}",
@@ -317,15 +336,19 @@ $(document).ready(function(){
             },
             success: function(response) {
                 if(response.success) {
-                    $(`input[data-rowid="${rowId}"]`).val(response.newQuantity);
-                    $(`#subtotal-${rowId}`).text('PKR ' + response.subtotal);
+                    var $input = $('input.qty-control__number[data-rowid="'+ rowId +'"]');
+                    // Update the visible input and update our stored "lastValid" quantity.
+                    $input.val(response.newQuantity);
+                    $input.data('lastValid', response.newQuantity);
+                    $('#subtotal-' + rowId).text('PKR ' + response.subtotal);
                     $('.cart-totals').html(response.totals);
+                    $('#stock-error-' + rowId).text('');
                 } else {
-                    $(`#stock-error-${rowId}`).text(response.message);
+                    $('#stock-error-' + rowId).text(response.message);
                 }
             },
             error: function(xhr) {
-                alert('An error occurred. Please try again.');
+                $('#checkout-error').text('An error occurred. Please try again.');
             }
         });
     }

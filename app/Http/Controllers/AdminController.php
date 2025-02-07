@@ -212,10 +212,17 @@ public function update_category(Request $request)
     $category->slug = $request->slug;
 
 
-    if ($request->hasFile('image')) {
-        $imagePath = $request->file('image')->store('categories', 'public');
-        $category->image = $imagePath;
-    }
+    if($request->hasFile('image'))
+    {            
+        if (File::exists(public_path('uploads/categories').'/'.$category->image)) {
+            File::delete(public_path('uploads/categories').'/'.$category->image);
+        }
+        $image = $request->file('image');
+        $file_extention = $request->file('image')->extension();
+        $file_name = Carbon::now()->timestamp . '.' . $file_extention;
+        $this->GenerateCategoryThumbailImage($image,$file_name);
+        $category->image = $file_name;
+    }        
 
     $category->save();
 

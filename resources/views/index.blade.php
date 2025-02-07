@@ -59,8 +59,8 @@
 
 .sold-out-badge {
     position: absolute;
-    bottom: 22px;
-    right: 35px;
+    bottom: 47px;
+    right: 53px;
     background: #ff9800;
     color: #fff;
     font-size: 0.9rem;
@@ -70,7 +70,7 @@
     z-index: 10;
   }
 
-  .pc__sold-out {
+  /* .pc__sold-out {
     position: absolute;
     top: 10px;
     right: 10px;
@@ -80,7 +80,7 @@
     font-weight: bold;
     border-radius: 3px;
     z-index: 10;
-  }
+  } */
 </style>
 <main>
   <!-- Slideshow Section -->

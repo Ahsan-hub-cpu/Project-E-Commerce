@@ -731,7 +731,7 @@ body {
         <span class="footer-copyright me-auto">©2025 Trakkiez Store</span>
         <div class="footer-settings d-md-flex align-items-center">
           <a href="{{route('privacy.policy')}}">Privacy Policy</a> &nbsp;|&nbsp; <a href="{{route('terms.condition')}}">Terms &amp;
-            Conditions</a>
+            Conditions</a> &nbsp;|&nbsp;  <a href="https://www.shopify.com/?utm_campaign=poweredby&utm_medium=shopify&utm_source=onlinestore">Powered By Shopify</a>
         </div>
       </div>
     </div>
@@ -759,6 +759,7 @@ body {
           <span>Shop</span>
         </a>
       </div>
+      
 
       <div class="col-4">
         <a href="{{route('wishlist.index')}}" class="footer-mobile__link d-flex flex-column align-items-center">

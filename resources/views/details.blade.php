@@ -4,6 +4,41 @@
   .filled-heart {
     color: orange;
   }
+
+  .size-btn {
+    min-width: 60px;
+    position: relative;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+    padding: 8px 12px;
+}
+
+.size-btn.active {
+    background: #ff9800;
+    color: white;
+    border-color: #ff9800;
+}
+
+.size-btn.sold-out {
+    opacity: 0.6;
+    cursor: not-allowed;
+    position: relative;
+}
+
+.size-btn.sold-out::after {
+    content: "—";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.2em;
+}
+
+.sold-out-text {
+    font-size: 0.7em;
+    margin-left: 4px;
+    color: #dc3545;
+}
   /* Style for sold-out labels */
   .sold-out-label {
     position: absolute;
@@ -40,7 +75,6 @@
   <div class="mb-md-1 pb-md-3"></div>
   <section class="product-single container">
     <div class="row">
-      <!-- Product Images Section -->
       <div class="col-lg-7">
         <div class="product-single__media" data-media-type="vertical-thumbnail">
           <div class="product-single__image">
@@ -93,7 +127,7 @@
           </div>
         </div>
       </div>
-      <!-- Product Details Section -->
+
       <div class="col-lg-5">
         <div class="d-flex justify-content-between mb-4 pb-md-2">
           <div class="breadcrumb mb-0 d-none d-md-block flex-grow-1">
@@ -102,12 +136,10 @@
             <a href="#" class="menu-link menu-link_us-s text-uppercase fw-medium">The Shop</a>
           </div>
           <div class="product-single__prev-next d-flex align-items-center justify-content-between justify-content-md-end flex-grow-1">
-            <!-- Navigation if needed -->
           </div>
         </div>
         <h1 class="product-single__name">{{ $product->name }}</h1>
         <div class="product-single__rating">
-          <!-- Add rating display if available -->
         </div>
         <div class="product-single__price">
           <span class="current-price">
@@ -121,7 +153,6 @@
         <div class="product-single__short-desc">
           <p>{{ $product->short_description }}</p>
         </div>
-        <!-- Out-of-Stock Check -->
         @if($product->quantity <= 0)
           <span class="btn btn-secondary mb-3">Sold Out</span>
         @else
@@ -130,26 +161,32 @@
           @else
             <form name="addtocart-form" method="POST" action="{{ route('cart.add') }}">
               @csrf
-              <!-- Size Options -->
               <div class="product-single__options">
-                <label for="size">Size:</label>
-                <select name="size_id" id="size" class="form-control" required>
-                  <option value="">Select Size</option>
-                  @if($product->productVariations && $product->productVariations->count() > 0)
+              <label>Size:</label>
+              <div class="size-selector d-flex flex-wrap gap-2">
+                    @if($product->productVariations && $product->productVariations->count() > 0)
                     @foreach($product->productVariations as $variation)
-                      <option value="{{ $variation->size->id }}" data-quantity="{{ $variation->quantity }}">
-                        {{ $variation->size->name }} ({{ $variation->quantity }} available)
-                      </option>
-                    @endforeach
-                  @else
-                    <option value="" disabled>No sizes available</option>
-                  @endif
-                </select>
-                @error('size_id')
-                  <div class="text-danger mt-1">{{ $message }}</div>
-                @enderror
-              </div>
-              <!-- Quantity Input -->
+                      <button type="button" 
+                        class="size-btn btn btn-outline-secondary {{ $variation->quantity <= 0 ? 'sold-out' : '' }}"
+                        data-size-id="{{ $variation->size->id }}"
+                        data-quantity="{{ $variation->quantity }}"
+                        {{ $variation->quantity <= 0 ? 'disabled' : '' }}>
+                    {{ $variation->size->name }}
+                    @if($variation->quantity <= 0)
+                        <span class="sold-out-text">(Sold Out)</span>
+                    @endif
+                </button>
+            @endforeach
+        @else
+            <div class="text-muted">No sizes available</div>
+        @endif
+    </div>
+    <input type="hidden" name="size_id" id="selected_size" value="">
+    <!-- @error('size_id')
+        <div class="text-danger mt-1">{{ $message }}</div>
+    @enderror -->
+</div>
+
               <div class="product-single__addtocart">
                 <div class="qty-control position-relative">
                   <input type="number" name="quantity" value="1" min="1" max="{{ $product->quantity }}" class="qty-control__number text-center">
@@ -169,6 +206,8 @@
             </form>
           @endif
         @endif
+
+        
         <div class="product-single__addtolinks">
           @if(Cart::instance("wishlist")->content()->where('id', $product->id)->count() > 0)
             <form method="POST" action="{{ route('wishlist.remove', ['rowId' => Cart::instance('wishlist')->content()->where('id', $product->id)->first()->rowId]) }}" id="from">
@@ -339,20 +378,16 @@
 @push('scripts')
 <script>
 $(document).ready(function(){
-  // Set the global maximum quantity as fallback (global product quantity)
+ 
   var globalMaxQuantity = {{ $product->quantity }};
-  
-  // When a size is selected, update the maximum quantity on the quantity input
   $('#size').on('change', function() {
       var selectedOption = $(this).find('option:selected');
       var availableQuantity = selectedOption.data('quantity');
       if(availableQuantity === undefined || availableQuantity === null) {
           availableQuantity = globalMaxQuantity;
       }
-      // Set the max attribute on the quantity input based on available quantity for the selected size
-      $('input.qty-control__number').attr('max', availableQuantity);
-      
-      // If current quantity is more than available, adjust it and show error message
+
+      $('input.qty-control__number').attr('max', availableQuantity);   
       var currentVal = parseInt($('input.qty-control__number').val());
       if(currentVal > availableQuantity){
           $('input.qty-control__number').val(availableQuantity);
@@ -361,33 +396,30 @@ $(document).ready(function(){
           $('.qty-error').text('');
       }
   });
-  
-  // Increase button handler
+
   $('.qty-control__increase').on('click', function(){
       var $input = $(this).siblings('input.qty-control__number');
       var currentVal = parseInt($input.val());
       var maxVal = parseInt($input.attr('max'));
       var $error = $(this).closest('.qty-control').siblings('.qty-error');
       if(currentVal < maxVal){
-          $input.val(currentVal + 1);
+          $input.val(currentVal);
           $error.text('');
       } else {
           $error.text("Only " + maxVal + " items are available.");
       }
   });
   
-  // Decrease button handler
   $('.qty-control__reduce').on('click', function(){
       var $input = $(this).siblings('input.qty-control__number');
       var currentVal = parseInt($input.val());
       var $error = $(this).closest('.qty-control').siblings('.qty-error');
       if(currentVal > 1){
-          $input.val(currentVal - 1);
+          $input.val(currentVal);
           $error.text('');
       }
   });
   
-  // Manual change to quantity input
   $('input.qty-control__number').on('change', function(){
       var $input = $(this);
       var currentVal = parseInt($input.val());
@@ -403,6 +435,67 @@ $(document).ready(function(){
           $input.val(1);
       }
   });
+
+  let selectedSize = null;
+    const quantityInput = $('input.qty-control__number');
+    const qtyError = $('.qty-error');
+
+    $('.size-btn').on('click', function() {
+        const btn = $(this);
+        if(btn.hasClass('sold-out') || btn.prop('disabled')) return;
+        
+        // Update selected size
+        $('.size-btn').removeClass('active');
+        btn.addClass('active');
+        selectedSize = {
+            id: btn.data('size-id'),
+            quantity: btn.data('quantity')
+        };
+        
+        // Update hidden input and quantity limits
+        $('#selected_size').val(selectedSize.id);
+        quantityInput.attr('max', selectedSize.quantity);
+        if(quantityInput.val() > selectedSize.quantity) {
+            quantityInput.val(1);
+            qtyError.text('');
+        }
+    });
+
+
+    $('.qty-control__increase').on('click', function(){
+        if(!selectedSize) {
+            qtyError.text('Please select a size first');
+            return;
+        }
+        
+        const currentVal = parseInt(quantityInput.val());
+        if(currentVal < selectedSize.quantity) {
+            quantityInput.val(currentVal);
+            qtyError.text('');
+        } else {
+            qtyError.text(`Only ${selectedSize.quantity} items available`);
+        }
+    });
+
+    $('.qty-control__reduce').on('click', function(){
+        const currentVal = parseInt(quantityInput.val());
+        if(currentVal > 1) {
+            quantityInput.val(currentVal);
+            qtyError.text('');
+        }
+    });
+
+    // Form submission validation
+    $('form[name="addtocart-form"]').on('submit', function(e) {
+        if(!selectedSize) {
+            e.preventDefault();
+            qtyError.text('Please select a size');
+        }
+    });
+
+
+
+
 });
 </script>
 @endpush

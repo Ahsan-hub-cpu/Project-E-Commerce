@@ -222,6 +222,13 @@
   </div>
 </div>
 
+@if(request()->has('subcategory') || request()->has('size') || request()->has('price_from') || request()->has('price_to') || request()->has('sort'))
+  <div class="text-center mt-3">
+    <a href="{{ route('shop.index') }}" class="btn btn-outline-dark">Clear Filter</a>
+  </div>
+@endif
+
+
 <!-- Product Count Display -->
 <div class="container mb-3">
   <div class="row">
@@ -323,11 +330,6 @@
 </div>
 
 <!-- Clear Filter & Pagination -->
-@if(request()->has('subcategory') || request()->has('size') || request()->has('price_from') || request()->has('price_to') || request()->has('sort'))
-  <div class="text-center mt-3">
-    <a href="{{ route('shop.index') }}" class="btn btn-outline-dark">Clear Filter</a>
-  </div>
-@endif
 
 @if(!request()->has('size') && !request()->has('price_from') && !request()->has('price_to') && !request()->has('sort') && !request()->has('subcategory'))
   <div class="divider"></div>

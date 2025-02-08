@@ -19,7 +19,7 @@
             <em>Checkout Your Items List</em>
           </span>
         </a>
-        <a href="order-confirmation.html" class="checkout-steps__item active">
+        <a href="javascript:void(0)" class="checkout-steps__item active">
           <span class="checkout-steps__item-number">03</span>
           <span class="checkout-steps__item-title">
             <span>Confirmation</span>

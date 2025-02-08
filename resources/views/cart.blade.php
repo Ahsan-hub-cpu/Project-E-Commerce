@@ -69,7 +69,6 @@
                                         <div class="shopping-cart__product-item__detail">
                                             <h4>{{ $cartItem->name }}</h4>
                                             <ul class="shopping-cart__product-item__options">
-                                                <li>Color: {{ ucfirst($cartItem->options['color'] ?? 'N/A') }}</li>
                                                 <li>
                                                     Size:
                                                     @if(isset($cartItem->model->availableSizes))
@@ -241,16 +240,18 @@ $(document).ready(function(){
     $('input.qty-control__number').each(function(){
         var $input = $(this);
         var availableQuantity = parseInt($input.data('max'));
+        console.log(availableQuantity)
         var globalQuantity = parseInt($input.data('global'));
         var allowedMax = Math.min(availableQuantity, globalQuantity);
-        $input.attr('max', allowedMax);
+        $input.attr('max', availableQuantity);
         var currentVal = parseInt($input.val());
-        if(currentVal > allowedMax) {
-            currentVal = allowedMax;
-            $input.val(allowedMax);
+        if(currentVal > availableQuantity) {
+            currentVal = availableQuantity;
+            $input.val(availableQuantity);
         }
         // Store the current valid quantity using jQuery’s data method.
-        $input.data('lastValid', currentVal);
+      $ahsan =  $input.data('lastValid', currentVal);
+      console.log($ahsan)
     });
 
     // Manual change on the input (only bind to "change" event)
@@ -282,6 +283,7 @@ $(document).ready(function(){
         var rowId = $(this).data('rowid');
         var $input = $('input.qty-control__number[data-rowid="'+ rowId +'"]');
         var lastValid = parseInt($input.data('lastValid'));
+        console.log(lastValid)
         var maxVal = parseInt($input.attr('max'));
         var $error = $('#stock-error-' + rowId);
         if(lastValid < maxVal) {
@@ -298,6 +300,7 @@ $(document).ready(function(){
         var rowId = $(this).data('rowid');
         var $input = $('input.qty-control__number[data-rowid="'+ rowId +'"]');
         var lastValid = parseInt($input.data('lastValid'));
+        console.log(lastValid)
         var $error = $('#stock-error-' + rowId);
         if(lastValid > 1) {
             var newQuantity = lastValid - 1;

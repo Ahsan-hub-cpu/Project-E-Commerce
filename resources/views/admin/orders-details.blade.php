@@ -84,7 +84,6 @@
                 <th class="text-center">Category</th>
                 <th class="text-center">Brand</th>
                 <th class="text-center">Size</th>
-                <th class="text-center">Color</th>
                 <th class="text-center">Options</th>
                 <th class="text-center">Return Status</th>
                 <th class="text-center">Action</th>
@@ -93,7 +92,7 @@
         <tbody>
         @foreach ($orderitems as $orderitem)
             <tr>
-                <td class="pname">
+                <td class="">
                     <div class="image">
                         <img src="{{ asset('uploads/products/thumbnails') }}/{{$orderitem->product->image}}" alt="{{$orderitem->product->name}}" class="image">
                     </div>
@@ -110,11 +109,8 @@
                 {{-- Size and Color --}}
                 @php
                     $size = $orderitem->productVariation ? $orderitem->productVariation->size->name : 'N/A';
-                    $color = $orderitem->productVariation ? $orderitem->productVariation->color->name : 'N/A';
                 @endphp
                 <td class="text-center">{{$size}}</td>
-                <td class="text-center">{{$color}}</td>
-
                 <td class="text-center">{{$orderitem->options}}</td>
                 <td class="text-center">{{$orderitem->rstatus == 0 ? "No" : "Yes"}}</td>
                 

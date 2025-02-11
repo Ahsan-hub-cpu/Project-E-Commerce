@@ -15,6 +15,11 @@
     .text-danger {
         color: #ee1907 !important;
     }
+    /* Optional: Style for disabled button */
+    .qty-control__increase:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
 </style>
 <main class="pt-90">
     <div class="mb-4 pb-4"></div>
@@ -182,7 +187,7 @@
                                         </tr>
                                         <tr class="cart-total">
                                             <th>Total</th>
-                                            <td>PKR {{ Session()->get("discounts")["total"] }}</td>
+                                            <td>PKR {{ Session::get("discounts")["total"] }}</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -239,22 +244,41 @@ $(document).ready(function(){
     // INITIALIZE: For each quantity input, calculate allowed maximum and set a "lastValid" value.
     $('input.qty-control__number').each(function(){
         var $input = $(this);
+        // Use the smaller of the available_quantity or the global_quantity.
         var availableQuantity = parseInt($input.data('max'));
-        console.log(availableQuantity)
         var globalQuantity = parseInt($input.data('global'));
         var allowedMax = Math.min(availableQuantity, globalQuantity);
-        $input.attr('max', availableQuantity);
+        // Set the input's max attribute to the allowed maximum.
+        $input.attr('max', allowedMax);
         var currentVal = parseInt($input.val());
-        if(currentVal > availableQuantity) {
-            currentVal = availableQuantity;
-            $input.val(availableQuantity);
+        if(currentVal > allowedMax) {
+            currentVal = allowedMax;
+            $input.val(allowedMax);
         }
-        // Store the current valid quantity using jQuery’s data method.
-      $ahsan =  $input.data('lastValid', currentVal);
-      console.log($ahsan)
+        $input.data('lastValid', currentVal);
+        // Update button state on initialization
+        var rowId = $input.data('rowid');
+        updateButtonState(rowId);
     });
 
-    // Manual change on the input (only bind to "change" event)
+    // Function to update the increase button state based on current quantity.
+    function updateButtonState(rowId) {
+        var $input = $('input.qty-control__number[data-rowid="'+ rowId +'"]');
+        var maxVal = parseInt($input.attr('max'));
+        var currentVal = parseInt($input.val());
+        var $increaseButton = $('.qty-control__increase[data-rowid="'+ rowId +'"]');
+        var $error = $('#stock-error-' + rowId);
+        if(currentVal >= maxVal){
+            $increaseButton.prop('disabled', true);
+            $error.text("Only " + maxVal + " items are available.");
+        } else {
+            $increaseButton.prop('disabled', false);
+            // Clear error only if the value is below maximum
+            $error.text('');
+        }
+    }
+
+    // When the user manually changes the quantity.
     $('input.qty-control__number').on('change', function(){
         var $input = $(this);
         var rowId = $input.data('rowid');
@@ -262,69 +286,64 @@ $(document).ready(function(){
         var maxVal = parseInt($input.attr('max'));
         var $error = $('#stock-error-' + rowId);
 
+        if(isNaN(inputVal) || inputVal < 1) {
+            inputVal = 1;
+            $input.val(1);
+            $error.text('');
+        }
         if(inputVal > maxVal) {
-            $error.text("Only " + maxVal + " items are available in this size");
+            // If entered quantity exceeds max, set it to max and show error.
             inputVal = maxVal;
             $input.val(maxVal);
+            $error.text("Only " + maxVal + " items are available.");
+        } else if(inputVal === maxVal) {
+            // Even if the user enters the maximum exactly, show the error.
+            $error.text("Only " + maxVal + " items are available.");
         } else {
             $error.text('');
         }
-        if(inputVal < 1 || isNaN(inputVal)) {
-            inputVal = 1;
-            $input.val(1);
-        }
-        // Update our stored value.
         $input.data('lastValid', inputVal);
         updateQuantity(rowId, inputVal);
+        updateButtonState(rowId);
     });
 
-    // Increase button: read the stored "lastValid" value and add 1.
+    // When the user clicks the increase button.
     $('.qty-control__increase').on('click', function(){
         var rowId = $(this).data('rowid');
         var $input = $('input.qty-control__number[data-rowid="'+ rowId +'"]');
         var lastValid = parseInt($input.data('lastValid'));
-        console.log(lastValid)
         var maxVal = parseInt($input.attr('max'));
         var $error = $('#stock-error-' + rowId);
+        
         if(lastValid < maxVal) {
             var newQuantity = lastValid + 1;
             $error.text('');
             updateQuantity(rowId, newQuantity);
         } else {
+            // When the maximum is already reached, show the error.
             $error.text("Only " + maxVal + " items are available.");
         }
+        // update button state will disable the button if needed.
+        updateButtonState(rowId);
     });
 
-    // Decrease button: read the stored "lastValid" value and subtract 1.
+    // When the user clicks the reduce button.
     $('.qty-control__reduce').on('click', function(){
         var rowId = $(this).data('rowid');
         var $input = $('input.qty-control__number[data-rowid="'+ rowId +'"]');
         var lastValid = parseInt($input.data('lastValid'));
-        console.log(lastValid)
         var $error = $('#stock-error-' + rowId);
         if(lastValid > 1) {
             var newQuantity = lastValid - 1;
             $error.text('');
             updateQuantity(rowId, newQuantity);
         }
+        updateButtonState(rowId);
     });
 
-    // Checkout button: prevent navigation if any stock error exists.
-    $('.btn-checkout').on('click', function(e){
-        e.preventDefault();
-        var errorFound = false;
-        $('.stock-error').each(function(){
-            if($.trim($(this).text()).length > 0){
-                errorFound = true;
-                return false;
-            }
-        });
-        if(errorFound) {
-            $('#checkout-error').text("Stock is not available");
-        } else {
-            $('#checkout-error').text("");
-            window.location.href = "{{ route('cart.checkout') }}";
-        }
+    // Checkout button redirection remains unchanged.
+    $('.shopping-cart .btn-checkout').off('click').on('click', function() {
+        window.location.href = "{{ route('cart.checkout') }}";
     });
 
     // AJAX function to update quantity on the server.
@@ -340,12 +359,19 @@ $(document).ready(function(){
             success: function(response) {
                 if(response.success) {
                     var $input = $('input.qty-control__number[data-rowid="'+ rowId +'"]');
-                    // Update the visible input and update our stored "lastValid" quantity.
                     $input.val(response.newQuantity);
                     $input.data('lastValid', response.newQuantity);
                     $('#subtotal-' + rowId).text('PKR ' + response.subtotal);
                     $('.cart-totals').html(response.totals);
+                    // Clear any previous error before checking max.
                     $('#stock-error-' + rowId).text('');
+                    
+                    // After updating, if the new quantity is equal to max, display the error.
+                    var maxVal = parseInt($input.attr('max'));
+                    if(response.newQuantity >= maxVal) {
+                        $('#stock-error-' + rowId).text("Only " + maxVal + " items are available.");
+                    }
+                    updateButtonState(rowId);
                 } else {
                     $('#stock-error-' + rowId).text(response.message);
                 }
@@ -358,3 +384,4 @@ $(document).ready(function(){
 });
 </script>
 @endpush
+

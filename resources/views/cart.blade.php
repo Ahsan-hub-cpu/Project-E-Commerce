@@ -63,6 +63,10 @@
                             </tr>
                         </thead>
                         <tbody>
+                        @php
+                            // Set the fixed shipping cost once.
+                            $shippingCost = 250;
+                        @endphp
                             @foreach ($cartItems as $cartItem)
                                 <tr>
                                     <td>
@@ -179,15 +183,20 @@
                                         </tr>
                                         <tr>
                                             <th>SHIPPING</th>
-                                            <td class="text-right">Free</td>
+                                            <td class="text-right">PKR {{ number_format($shippingCost, 2) }}</td>
                                         </tr>
                                         <tr>
                                             <th>VAT</th>
                                             <td>PKR {{ Session()->get("discounts")["tax"] }}</td>
                                         </tr>
                                         <tr class="cart-total">
+                                            @php
+                                                // Remove commas before arithmetic
+                                                $discountTotal = (float) str_replace(',', '', Session::get("discounts")["total"]);
+                                                $finalTotal = $discountTotal + $shippingCost;
+                                            @endphp
                                             <th>Total</th>
-                                            <td>PKR {{ Session::get("discounts")["total"] }}</td>
+                                            <td>PKR {{ number_format($finalTotal, 2) }}</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -200,15 +209,19 @@
                                         </tr>
                                         <tr>
                                             <th>SHIPPING</th>
-                                            <td class="text-right">Free</td>
+                                            <td class="text-right">PKR {{ number_format($shippingCost, 2) }}</td>
                                         </tr>
                                         <tr>
                                             <th>VAT</th>
                                             <td>PKR {{ Cart::instance('cart')->tax() }}</td>
                                         </tr>
                                         <tr class="cart-total">
+                                            @php
+                                                $cartTotal = (float) str_replace(',', '', Cart::instance('cart')->total());
+                                                $finalTotal = $cartTotal + $shippingCost;
+                                            @endphp
                                             <th>Total</th>
-                                            <td>PKR {{ Cart::instance('cart')->total() }}</td>
+                                            <td>PKR {{ number_format($finalTotal, 2) }}</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -216,9 +229,7 @@
                         </div>
                         <div class="mobile_fixed-btn_wrapper">
                             <div class="button-wrapper container">
-                                <!-- Changed from an anchor to a button -->
                                 <button type="button" class="btn btn-primary btn-checkout">PROCEED TO CHECKOUT</button>
-                                <!-- Checkout error will be displayed here -->
                                 <div id="checkout-error" class="text-danger"></div>
                             </div>
                         </div>
@@ -241,14 +252,12 @@
 <script>
 $(document).ready(function(){
 
-    // INITIALIZE: For each quantity input, calculate allowed maximum and set a "lastValid" value.
+    // Initialize quantity inputs
     $('input.qty-control__number').each(function(){
         var $input = $(this);
-        // Use the smaller of the available_quantity or the global_quantity.
         var availableQuantity = parseInt($input.data('max'));
         var globalQuantity = parseInt($input.data('global'));
         var allowedMax = Math.min(availableQuantity, globalQuantity);
-        // Set the input's max attribute to the allowed maximum.
         $input.attr('max', allowedMax);
         var currentVal = parseInt($input.val());
         if(currentVal > allowedMax) {
@@ -256,12 +265,11 @@ $(document).ready(function(){
             $input.val(allowedMax);
         }
         $input.data('lastValid', currentVal);
-        // Update button state on initialization
         var rowId = $input.data('rowid');
         updateButtonState(rowId);
     });
 
-    // Function to update the increase button state based on current quantity.
+    // Update increase button state based on current quantity.
     function updateButtonState(rowId) {
         var $input = $('input.qty-control__number[data-rowid="'+ rowId +'"]');
         var maxVal = parseInt($input.attr('max'));
@@ -273,31 +281,27 @@ $(document).ready(function(){
             $error.text("Only " + maxVal + " items are available.");
         } else {
             $increaseButton.prop('disabled', false);
-            // Clear error only if the value is below maximum
             $error.text('');
         }
     }
 
-    // When the user manually changes the quantity.
+    // When quantity is manually changed.
     $('input.qty-control__number').on('change', function(){
         var $input = $(this);
         var rowId = $input.data('rowid');
         var inputVal = parseInt($input.val());
         var maxVal = parseInt($input.attr('max'));
         var $error = $('#stock-error-' + rowId);
-
         if(isNaN(inputVal) || inputVal < 1) {
             inputVal = 1;
             $input.val(1);
             $error.text('');
         }
         if(inputVal > maxVal) {
-            // If entered quantity exceeds max, set it to max and show error.
             inputVal = maxVal;
             $input.val(maxVal);
             $error.text("Only " + maxVal + " items are available.");
         } else if(inputVal === maxVal) {
-            // Even if the user enters the maximum exactly, show the error.
             $error.text("Only " + maxVal + " items are available.");
         } else {
             $error.text('');
@@ -307,27 +311,24 @@ $(document).ready(function(){
         updateButtonState(rowId);
     });
 
-    // When the user clicks the increase button.
+    // When the increase button is clicked.
     $('.qty-control__increase').on('click', function(){
         var rowId = $(this).data('rowid');
         var $input = $('input.qty-control__number[data-rowid="'+ rowId +'"]');
         var lastValid = parseInt($input.data('lastValid'));
         var maxVal = parseInt($input.attr('max'));
         var $error = $('#stock-error-' + rowId);
-        
         if(lastValid < maxVal) {
             var newQuantity = lastValid + 1;
             $error.text('');
             updateQuantity(rowId, newQuantity);
         } else {
-            // When the maximum is already reached, show the error.
             $error.text("Only " + maxVal + " items are available.");
         }
-        // update button state will disable the button if needed.
         updateButtonState(rowId);
     });
 
-    // When the user clicks the reduce button.
+    // When the reduce button is clicked.
     $('.qty-control__reduce').on('click', function(){
         var rowId = $(this).data('rowid');
         var $input = $('input.qty-control__number[data-rowid="'+ rowId +'"]');
@@ -341,12 +342,12 @@ $(document).ready(function(){
         updateButtonState(rowId);
     });
 
-    // Checkout button redirection remains unchanged.
+    // Checkout redirection.
     $('.shopping-cart .btn-checkout').off('click').on('click', function() {
         window.location.href = "{{ route('cart.checkout') }}";
     });
 
-    // AJAX function to update quantity on the server.
+    // AJAX function to update quantity.
     function updateQuantity(rowId, quantity) {
         $.ajax({
             url: "{{ route('cart.update.quantity') }}",
@@ -362,11 +363,9 @@ $(document).ready(function(){
                     $input.val(response.newQuantity);
                     $input.data('lastValid', response.newQuantity);
                     $('#subtotal-' + rowId).text('PKR ' + response.subtotal);
+                    // Replace the totals HTML with the response from the server.
                     $('.cart-totals').html(response.totals);
-                    // Clear any previous error before checking max.
                     $('#stock-error-' + rowId).text('');
-                    
-                    // After updating, if the new quantity is equal to max, display the error.
                     var maxVal = parseInt($input.attr('max'));
                     if(response.newQuantity >= maxVal) {
                         $('#stock-error-' + rowId).text("Only " + maxVal + " items are available.");
@@ -384,4 +383,3 @@ $(document).ready(function(){
 });
 </script>
 @endpush
-

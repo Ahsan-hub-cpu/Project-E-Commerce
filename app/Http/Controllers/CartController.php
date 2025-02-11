@@ -67,11 +67,11 @@ class CartController extends Controller
             $request->quantity,                   // Quantity.
             $request->price,                      // Price.
             [
-                'size'                => $size->name,              // Size Name.
-                'size_id'             => $size->id,                // Size ID.
-                'product_variation_id'=> $productVariation->id,    // Variation ID.
+                'size'                => $size->name,               // Size Name.
+                'size_id'             => $size->id,                 // Size ID.
+                'product_variation_id'=> $productVariation->id,     // Variation ID.
                 'available_quantity'  => $productVariation->quantity, // Variation (size-specific) quantity.
-                'global_quantity'     => $product->quantity,         // Global product quantity.
+                'global_quantity'     => $product->quantity,        // Global product quantity.
             ]
         )->associate('App\Models\Product');
 
@@ -93,13 +93,13 @@ class CartController extends Controller
             return response()->json(['success' => false, 'message' => 'Cart item not found.']);
         }
 
-        // Retrieve the available (variation) and global quantities from cart item options.
-        $availableQuantity = isset($cartItem->options->available_quantity) 
-                             ? (int)$cartItem->options->available_quantity 
+        // Retrieve available and global quantities from cart item options.
+        $availableQuantity = isset($cartItem->options->available_quantity)
+                             ? (int)$cartItem->options->available_quantity
                              : PHP_INT_MAX;
         $globalQuantity = isset($cartItem->options->global_quantity)
-                        ? (int)$cartItem->options->global_quantity
-                        : PHP_INT_MAX;
+                          ? (int)$cartItem->options->global_quantity
+                          : PHP_INT_MAX;
         $allowedMax = min($availableQuantity, $globalQuantity);
 
         if ($newQuantity > $allowedMax) {
@@ -111,14 +111,34 @@ class CartController extends Controller
 
         // Update the quantity in the cart.
         Cart::instance('cart')->update($rowId, ['qty' => $newQuantity]);
+        
+        // Run any discount calculations (if applicable).
         $this->calculateDiscounts();
+        
+        // Get the updated cart item.
         $updatedCartItem = Cart::instance('cart')->get($rowId);
+
+        // Set the fixed shipping cost.
+        $shippingCost = 250; // Fixed shipping cost in PKR
+
+        // Recalculate totals from the cart.
+        // These methods should return the totals without any shipping charge.
+        $subtotal = (float) str_replace(',', '', Cart::instance('cart')->subtotal());
+        $tax      = (float) str_replace(',', '', Cart::instance('cart')->tax());
+        $total    = (float) str_replace(',', '', Cart::instance('cart')->total()); // Cart total (without shipping)
+
+        // Add the fixed shipping cost only once.
+        $finalTotal = $total + $shippingCost;
+
+        // Render the updated totals partial view with the calculated values.
+        // Make sure your partial view uses the $finalTotal variable directly.
+        $totals = view('partials.cart-totals', compact('shippingCost', 'subtotal', 'tax', 'finalTotal'))->render();
 
         return response()->json([
             'success'     => true,
             'newQuantity' => $updatedCartItem->qty,
             'subtotal'    => $updatedCartItem->price * $updatedCartItem->qty,
-            'totals'      => view('partials.cart-totals')->render()
+            'totals'      => $totals,
         ]);
     }
 
@@ -199,6 +219,36 @@ class CartController extends Controller
         }
     }
 
+    // In setAmountForCheckout, add shipping cost to the total.
+    public function setAmountForCheckout()
+    {
+        $shippingCost = 250; // Fixed shipping cost
+        if (Cart::instance('cart')->count() > 0) {
+            if (session()->has('coupon')) {
+                // Get discount totals, remove commas, then add shipping.
+                $discountTotal = (float) str_replace(',', '', session()->get('discounts')['total']);
+                $finalTotal = $discountTotal + $shippingCost;
+                session()->put('checkout', [
+                    'discount' => session()->get('discounts')['discount'],
+                    'subtotal' => session()->get('discounts')['subtotal'],
+                    'tax' => session()->get('discounts')['tax'],
+                    'total' => number_format($finalTotal, 2, '.', '')
+                ]);
+            } else {
+                $cartTotal = (float) str_replace(',', '', Cart::instance('cart')->total());
+                $finalTotal = $cartTotal + $shippingCost;
+                session()->put('checkout', [
+                    'discount' => 0,
+                    'subtotal' => Cart::instance('cart')->subtotal(),
+                    'tax' => Cart::instance('cart')->tax(),
+                    'total' => number_format($finalTotal, 2, '.', '')
+                ]);
+            }
+        } else {
+            session()->forget('checkout');
+        }
+    }
+
     public function remove_coupon_code()
     {
         session()->forget('coupon');
@@ -210,29 +260,6 @@ class CartController extends Controller
     {
         $address = session()->get('address', null);
         return view('checkout', compact('address'));
-    }
-
-    public function setAmountForCheckout()
-    {
-        if (Cart::instance('cart')->count() > 0) {
-            if (session()->has('coupon')) {
-                session()->put('checkout', [
-                    'discount' => session()->get('discounts')['discount'],
-                    'subtotal' => session()->get('discounts')['subtotal'],
-                    'tax' => session()->get('discounts')['tax'],
-                    'total' => session()->get('discounts')['total']
-                ]);
-            } else {
-                session()->put('checkout', [
-                    'discount' => 0,
-                    'subtotal' => Cart::instance('cart')->subtotal(),
-                    'tax' => Cart::instance('cart')->tax(),
-                    'total' => Cart::instance('cart')->total()
-                ]);
-            }
-        } else {
-            session()->forget('checkout');
-        }
     }
 
     public function place_order(Request $request)
@@ -257,10 +284,11 @@ class CartController extends Controller
             return redirect()->route('cart.index')->with('error', 'Checkout data is missing.');
         }
 
+        // Remove commas and convert to float.
         $subtotal = (float) str_replace(',', '', $checkout['subtotal']);
         $discount = (float) str_replace(',', '', $checkout['discount']);
         $tax      = (float) str_replace(',', '', $checkout['tax']);
-        $total    = (float) str_replace(',', '', $checkout['total']);
+        $total    = (float) str_replace(',', '', $checkout['total']); // This total now includes shipping
 
         try {
             // Check stock availability for each cart item
@@ -272,7 +300,7 @@ class CartController extends Controller
 
                 // Check if the selected size is in stock
                 $productVariation = Product_Variations::where('product_id', $item->id)
-                                                      ->where('size_id', $item->options->size_id)  // Size ID
+                                                      ->where('size_id', $item->options->size_id)
                                                       ->first();
                 if (!$productVariation || $productVariation->quantity < $item->qty) {
                     return back()->with('error', "Sorry, the selected size is out of stock.");
@@ -284,13 +312,16 @@ class CartController extends Controller
                 }
             }
 
+            $shippingCost = 250;
+
             // Create the order
             $order = new Order();
             $order->email    = $request->email;
             $order->subtotal = $subtotal;
             $order->discount = $discount;
             $order->tax      = $tax;
-            $order->total    = $total;
+            $order->total    = $total; // This total includes shipping
+            $order->shipping_cost = $shippingCost;
             $order->name     = $request->name;
             $order->phone    = $request->phone;
             $order->locality = $request->locality;

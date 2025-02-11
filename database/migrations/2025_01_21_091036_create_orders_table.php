@@ -18,6 +18,8 @@ return new class extends Migration
             $table->decimal('discount', 10, 2)->default(0);
             $table->decimal('tax', 10, 2);
             $table->decimal('total', 10, 2);
+            // Added shipping_cost column
+            $table->decimal('shipping_cost', 10, 2)->default(0);
             $table->string('name');
             $table->string('phone');
             $table->string('locality');

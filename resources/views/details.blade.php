@@ -368,8 +368,8 @@
           <use href="#icon_next_md" />
         </svg>
       </div>
-
       <div class="products-pagination mt-4 mb-5 d-flex align-items-center justify-content-center"></div>
+      
     </div>
   </section>
 </main>

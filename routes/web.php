@@ -58,6 +58,11 @@ Route::get('/terms-condition', function () {
     return view('terms-condition'); 
 })->name('terms.condition');
 
+Route::get('/return-policy', function () {
+    return view('return'); 
+})->name('return.policy');
+
+
 
 Route::put('/cart/update-quantity', [CartController::class, 'updateQuantity'])->name('cart.update.quantity');
 

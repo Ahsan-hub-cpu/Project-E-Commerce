@@ -247,26 +247,7 @@
     </symbol>
   </svg>
   <style>
-.contact-icons {
-  display: flex;
-  gap: 30px;
-  margin-top: 7px;
-}
 
-.contact-icons a {
-  color: green; 
-  font-size: 20px; 
-}
-
-
-.whatsapp-icon {
-  color: green;
-}
-
-.phone-icon {
-  color: green; 
-
-}
     #header {
       padding-top: 8px;
       padding-bottom: 8px;
@@ -389,6 +370,89 @@
 body {
   padding-top: 80px; /* Adjust based on actual header height */
 }
+
+.fab-container {
+  position: fixed;         /* Fixed so it stays in view */
+  top: 95%;                /* Vertically center the container */
+  right: 1470px;             /* Distance from the right edge */
+  transform: translateY(-50%);
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  vertical-align: middle;
+  transition: opacity 0.3s ease;
+  z-index: 1000;           /* High z-index to be on top */
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.fab-button {
+  background-color: #ff6b6b;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 18px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+}
+
+.fab-icons {
+  position: absolute;
+  bottom: 100%;           /* Icons appear above the button */
+  left: 50%;              
+  transform: translateX(-50%);
+  display: none;          /* Hidden by default; toggled via JS or hover */
+  flex-direction: column; 
+  gap: 8px;
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.fab-container:hover .fab-icons {
+  display: flex;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.fab-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;          
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  text-decoration: none;
+  color: #fff;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  transition: transform 0.2s ease;
+}
+
+.fab-icon:hover {
+  transform: scale(1.05);
+}
+
+.fab-icon.whatsapp {
+  background-color: #25D366;
+}
+
+.fab-icon.phone {
+  background-color: #0084FF;
+  width: 40px;
+  height: 40px;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
   </style>
   <div class="header-mobile header_sticky">
     <div class="container d-flex align-items-center h-100">
@@ -461,7 +525,6 @@ body {
       </div>
 
       <ul class="container social-links list-unstyled d-flex flex-wrap mb-0">
-  <!-- Facebook Icon -->
   <li>
     <a href="#" class="footer__social-link d-block ps-0">
       <svg class="svg-icon svg-icon_facebook" width="9" height="15" viewBox="0 0 9 15" xmlns="http://www.w3.org/2000/svg">
@@ -485,20 +548,6 @@ body {
       <svg class="svg-icon svg-icon_youtube" width="16" height="11" viewBox="0 0 16 11" xmlns="http://www.w3.org/2000/svg">
         <path d="M15.0117 1.8584C14.8477 1.20215 14.3281 0.682617 13.6992 0.518555C12.5234 0.19043 7.875 0.19043 7.875 0.19043C7.875 0.19043 3.19922 0.19043 2.02344 0.518555C1.39453 0.682617 0.875 1.20215 0.710938 1.8584C0.382812 3.00684 0.382812 5.46777 0.382812 5.46777C0.382812 5.46777 0.382812 7.90137 0.710938 9.07715C0.875 9.7334 1.39453 10.2256 2.02344 10.3896C3.19922 10.6904 7.875 10.6904 7.875 10.6904C7.875 10.6904 12.5234 10.6904 13.6992 10.3896C14.3281 10.2256 14.8477 9.7334 15.0117 9.07715C15.3398 7.90137 15.3398 5.46777 15.3398 5.46777C15.3398 5.46777 15.3398 3.00684 15.0117 1.8584ZM6.34375 7.68262V3.25293L10.2266 5.46777L6.34375 7.68262Z" />
       </svg>
-    </a>
-  </li>
-
-  <!-- WhatsApp Icon using Font Awesome -->
-  <li>
-    <a href="https://wa.me/923249485029" class="footer__social-link d-block">
-      <i class="fab fa-whatsapp" style="font-size: 15px;"></i> <!-- WhatsApp icon from Font Awesome -->
-    </a>
-  </li>
-
-  <!-- Phone Icon using Font Awesome -->
-  <li>
-    <a href="tel:923249485029" class="footer__social-link d-block">
-      <i class="fas fa-phone-alt" style="font-size: 13px;"></i> <!-- Phone icon from Font Awesome -->
     </a>
   </li>
 </ul>
@@ -610,18 +659,6 @@ body {
           <span class="cart-amount d-block position-absolute js-cart-items-count">{{Cart::instance('cart')->content()->count()}}</span>
           @endif
         </a>
-
-        <!-- New contact icons section -->
-        <div class="contact-icons">
-          <!-- WhatsApp Icon -->
-          <a href="https://wa.me/923249485029" target="_blank" class="whatsapp-icon" rel="noopener noreferrer">
-            <i class="fab fa-whatsapp"></i>
-          </a>
-          <!-- Phone Icon -->
-          <a href="tel:923249485029" class="phone-icon">
-            <i class="fas fa-phone-alt" style="font-size: 15px;"></i>
-          </a>
-        </div>
       </div>
     </div>
   </div>
@@ -728,15 +765,47 @@ body {
 
     <div class="footer-bottom">
       <div class="container d-md-flex align-items-center">
-        <span class="footer-copyright me-auto">©2025 Trakkiez Store</span>
+        <span class="me-auto d-flex align-items-center">
+          ©2025 Trakkiez Store
+          <!-- Chat Button Container -->
+          <div class="fab-container ms-3">
+            <!-- Hidden Icons (positioned absolutely) -->
+            <div id="fabIcons" class="fab-icons">
+              <a 
+                href="https://wa.me/923249485029" 
+                target="_blank" 
+                class="fab-icon whatsapp"
+                title="WhatsApp"
+              >
+                <i class="fab fa-whatsapp"></i>
+              </a>
+              <a 
+                href="tel:923249485029" 
+                class="fab-icon phone"
+                title="Call Us"
+              >
+                <i class="fas fa-phone"></i>
+              </a>
+            </div>
+            <!-- Cross Button remains visible -->
+            <div id="fabButton" class="fab-button">
+              <i class="fas fa-times"></i>
+            </div>
+          </div>
+        </span>
+        <!-- Right side: links -->
         <div class="footer-settings d-md-flex align-items-center">
-          <a href="{{route('privacy.policy')}}">Privacy Policy</a> &nbsp;|&nbsp; <a href="{{route('terms.condition')}}">Terms &amp;
-            Conditions</a> &nbsp;|&nbsp;  <a href="https://www.shopify.com/?utm_campaign=poweredby&utm_medium=shopify&utm_source=onlinestore">Powered By Shopify</a>
+          <a href="{{route('privacy.policy')}}">Privacy Policy</a> &nbsp;|&nbsp; 
+          <a href="{{route('terms.condition')}}">Terms &amp; Conditions</a> &nbsp;|&nbsp;  
+          <a href="https://www.shopify.com/?utm_campaign=poweredby&utm_medium=shopify&utm_source=onlinestore">
+            Powered By Shopify
+          </a>
+          &nbsp;|&nbsp; 
+          <a href="{{route('return.policy')}}">Return Policy</a>
         </div>
       </div>
     </div>
   </footer>
-
 
   <footer class="footer-mobile container w-100 px-5 d-md-none bg-body">
     <div class="row text-center">
@@ -788,52 +857,74 @@ body {
   <script src="{{asset('assets/js/plugins/swiper.min.js')}}"></script>
   <script src="{{asset('assets/js/plugins/countdown.js')}}"></script>
   <script>
-  $(document).ready(function() {
-    $("#search-input").on("keyup", function() {
-      var searchQuery = $(this).val();
+    $(document).ready(function() {
+      $("#search-input").on("keyup", function() {
+        var searchQuery = $(this).val();
 
-      if (searchQuery.length > 2) {
-        $.ajax({
-          type: "GET",
-          url: "{{ route('home.search') }}", // Blade route must be outside of backticks
-          data: { query: searchQuery },
-          dataType: "json",
-          success: function(data) {
-            $("#box-content-search").html(""); // Clear previous results
+        if (searchQuery.length > 2) {
+          $.ajax({
+            type: "GET",
+            url: "{{ route('home.search') }}", // Blade route must be outside of backticks
+            data: { query: searchQuery },
+            dataType: "json",
+            success: function(data) {
+              $("#box-content-search").html(""); // Clear previous results
 
-            $.each(data, function(index, item) {
-              var url = "{{ route('shop.product.details', ['product_slug' => '__slug__']) }}";
-              url = url.replace('__slug__', item.slug); // Replace placeholder with actual slug
+              $.each(data, function(index, item) {
+                var url = "{{ route('shop.product.details', ['product_slug' => '__slug__']) }}";
+                url = url.replace('__slug__', item.slug); // Replace placeholder with actual slug
 
-              var imageUrl = "{{ asset('uploads/products/thumbnails') }}/" + item.image; // Correct asset path
+                var imageUrl = "{{ asset('uploads/products/thumbnails') }}/" + item.image; // Correct asset path
 
-              $("#box-content-search").append(`
-                <li>
-                  <ul> 
-                    <li class="product-item gap14 mb-10">
-                      <div class="image no-bg"> 
-                        <img src="${imageUrl}" alt="${item.name}">
-                      </div>
-                      <div class="flex items-center justify-between gap20 flex-grow"> 
-                        <div class="name">
-                          <a href="${url}" class="body-text">${item.name}</a>
+                $("#box-content-search").append(`
+                  <li>
+                    <ul> 
+                      <li class="product-item gap14 mb-10">
+                        <div class="image no-bg"> 
+                          <img src="${imageUrl}" alt="${item.name}">
                         </div>
-                      </div>
-                    </li>
-                    <li class="mb-10">
-                      <div class="divider"></div>
-                    </li>
-                  </ul>
-                </li>
-              `);
-            });
-          }
-        });
+                        <div class="flex items-center justify-between gap20 flex-grow"> 
+                          <div class="name">
+                            <a href="${url}" class="body-text">${item.name}</a>
+                          </div>
+                        </div>
+                      </li>
+                      <li class="mb-10">
+                        <div class="divider"></div>
+                      </li>
+                    </ul>
+                  </li>
+                `);
+              });
+            }
+          });
+        }
+      });
+    });
+  </script>
+  <script src="{{asset('assets/js/theme.js')}}"></script>
+  <script>
+    // Ensure the FAB always remains visible after theme.js loads
+    const fabButton = document.getElementById('fabButton');
+    const fabIcons = document.getElementById('fabIcons');
+
+    fabButton.addEventListener('click', () => {
+      // Toggle display of the hidden icons
+      if (fabIcons.style.display === 'flex') {
+        fabIcons.style.display = 'none';
+      } else {
+        fabIcons.style.display = 'flex';
       }
     });
-  });
-</script>
-  <script src="{{asset('assets/js/theme.js')}}"></script>
+
+    const fabContainer = document.querySelector('.fab-container');
+
+    // Always keep the FAB visible on scroll
+    window.addEventListener('scroll', () => {
+      fabContainer.style.opacity = '1';
+      fabContainer.style.visibility = 'visible';
+    });
+  </script>
   @stack("scripts")
 </body>
 </html>

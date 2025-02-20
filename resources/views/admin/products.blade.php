@@ -55,7 +55,7 @@
                             <th>SalePrice</th>
                             <th>SKU</th>
                             <th>Category</th>
-                            <th>Subcategory</th> <!-- Added Subcategory column -->
+                            <th>Subcategory</th>
                             <th>Brand</th>
                             <th>Size</th>
                             <th>Featured</th>

@@ -285,14 +285,11 @@
       margin-bottom: 10px;
     }
 
-/* Mobile-specific styles */
 @media (max-width: 767px) {
-  /* Set the header to black */
   .header-mobile {
     background-color: black !important;
   }
 
-  /* Set the icons to white */
   .nav-icon,
   .header-tools__cart svg,
   .search-popup__submit svg,
@@ -300,29 +297,25 @@
     fill: white;
   }
 
-  /* Change the text color of the navigation list to white */
   .header-mobile__navigation.open .navigation__link {
     color: white !important;
   }
 
-  /* Optional: Set a color for the hamburger icon (three lines) */
   .mobile-nav-activator svg {
     fill: white !important;
   }
 
-  /* Change the color of the close button inside the navigation */
   .btn-close-lg {
     color: white !important;
   }
 
-  /* If you have specific colors for the active state in the navigation list */
+  
   .header-mobile__navigation .navigation__item.active a {
-    color: #FFD700;  /* Optional: Change color when active (e.g., Gold) */
+    color: #FFD700;  
   }
 }
 
 
-/* Ensure header remains black */
 .header {
   background-color: black !important;
   position: fixed;
@@ -337,16 +330,15 @@
   background-color: black !important;
 }
 
-/* Ensure navigation links and icons are white */
+
 .header .navigation__link,
 .header-tools__item a,
 .header-tools__item svg,
 .header-tools__item i {
   color: white !important;
-  fill: white !important; /* Ensures SVG icons remain white */
+  fill: white !important; 
 }
 
-/* Change hover color for better visibility */
 .header .navigation__link:hover,
 .header-tools__item a:hover,
 .header-tools__item svg:hover,
@@ -355,7 +347,6 @@
   fill: #f0f0f0 !important;
 }
 
-/* Contact icons specific styling */
 .contact-icons a {
   color: white !important;
   font-size: 20px;
@@ -366,22 +357,22 @@
   color: #f0f0f0 !important;
 }
 
-/* Adjust body padding to prevent content from being hidden behind fixed header */
+
 body {
-  padding-top: 80px; /* Adjust based on actual header height */
+  padding-top: 80px;
 }
 
 .fab-container {
-  position: fixed;         /* Fixed so it stays in view */
-  top: 95%;                /* Vertically center the container */
-  right: 1470px;             /* Distance from the right edge */
+  position: fixed;         
+  top: 95%;               
+  right: 1470px;        
   transform: translateY(-50%);
   display: inline-block;
   width: 40px;
   height: 40px;
   vertical-align: middle;
   transition: opacity 0.3s ease;
-  z-index: 1000;           /* High z-index to be on top */
+  z-index: 1000;          
   opacity: 1 !important;
   visibility: visible !important;
 }
@@ -453,6 +444,45 @@ body {
   margin-bottom: 10px;
 }
 
+.fab-icon .tooltip {
+  visibility: hidden;           /* Hidden by default */
+  opacity: 0;                   /* Invisible by default */
+  position: absolute;
+  top: 50%;                     /* Align with icon’s vertical center */
+  left: 110%;                   /* Position tooltip to the right */
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 5px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  font-size: 14px;
+  transition: opacity 0.3s;
+  pointer-events: none;         /* So it doesn’t block hover events */
+}
+
+/* Show the tooltip on hover */
+.fab-icon:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Toggle button styling (optional) */
+.fab-button {
+   /* Hide it if you don't need a toggle effect */
+  position: relative;
+  width: 40px;
+  height: 40px;
+  background-color: #ff5f57; 
+  border-radius: 50%;
+  color: #fff;
+  font-size: 24px;
+  text-align: center;
+  line-height: 50px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  cursor: pointer;
+  margin-left: 2px;
+}
   </style>
   <div class="header-mobile header_sticky">
     <div class="container d-flex align-items-center h-100">
@@ -533,7 +563,6 @@ body {
     </a>
   </li>
 
-  <!-- Instagram Icon -->
   <li>
     <a href="#" class="footer__social-link d-block">
       <svg class="svg-icon svg-icon_instagram" width="14" height="13" viewBox="0 0 14 13" xmlns="http://www.w3.org/2000/svg">
@@ -542,7 +571,7 @@ body {
     </a>
   </li>
 
-  <!-- YouTube Icon -->
+
   <li>
     <a href="#" class="footer__social-link d-block">
       <svg class="svg-icon svg-icon_youtube" width="16" height="11" viewBox="0 0 16 11" xmlns="http://www.w3.org/2000/svg">
@@ -763,49 +792,51 @@ body {
       </div>
     </div>
 
-    <div class="footer-bottom">
-      <div class="container d-md-flex align-items-center">
-        <span class="me-auto d-flex align-items-center">
-          ©2025 Trakkiez Store
-          <!-- Chat Button Container -->
-          <div class="fab-container ms-3">
-            <!-- Hidden Icons (positioned absolutely) -->
-            <div id="fabIcons" class="fab-icons">
-              <a 
-                href="https://wa.me/923249485029" 
-                target="_blank" 
-                class="fab-icon whatsapp"
-                title="WhatsApp"
-              >
-                <i class="fab fa-whatsapp"></i>
-              </a>
-              <a 
-                href="tel:923249485029" 
-                class="fab-icon phone"
-                title="Call Us"
-              >
-                <i class="fas fa-phone"></i>
-              </a>
-            </div>
-            <!-- Cross Button remains visible -->
-            <div id="fabButton" class="fab-button">
-              <i class="fas fa-times"></i>
-            </div>
-          </div>
-        </span>
-        <!-- Right side: links -->
-        <div class="footer-settings d-md-flex align-items-center">
-          <a href="{{route('privacy.policy')}}">Privacy Policy</a> &nbsp;|&nbsp; 
-          <a href="{{route('terms.condition')}}">Terms &amp; Conditions</a> &nbsp;|&nbsp;  
-          <a href="https://www.shopify.com/?utm_campaign=poweredby&utm_medium=shopify&utm_source=onlinestore">
-            Powered By Shopify
+<div class="footer-bottom">
+  <div class="container d-md-flex align-items-center">
+    <span class="me-auto d-flex align-items-center">
+      ©2025 Trakkiez Store
+      <div class="fab-container ms-3">
+        <!-- Icons container -->
+        <div id="fabIcons" class="fab-icons">
+          <!-- WhatsApp Icon -->
+          <a 
+            href="https://wa.me/923249485029" 
+            target="_blank" 
+            class="fab-icon whatsapp"
+            title="WhatsApp"
+          >
+            <i class="fab fa-whatsapp"></i>
+            <!-- Tooltip text -->
+            <span class="tooltip">WhatsApp</span>
           </a>
-          &nbsp;|&nbsp; 
-          <a href="{{route('return.policy')}}">Return Policy</a>
+          <!-- Phone Icon -->
+          <a 
+            href="tel:923249485029" 
+            class="fab-icon phone"
+            title="Call Us"
+          >
+            <i class="fas fa-phone"></i>
+            <!-- Tooltip text -->
+            <span class="tooltip">Call Us</span>
+          </a>
+        </div>
+        <!-- Toggle Button (if you want to open/close the icons) -->
+        <div id="fabButton" class="fab-button">
+          <i class="fas fa-times"></i>
         </div>
       </div>
+    </span>
+    <div class="footer-settings d-md-flex align-items-center">
+      <a href="{{ route('privacy.policy') }}">Privacy Policy</a> &nbsp;|&nbsp; 
+      <a href="{{ route('terms.condition') }}">Terms &amp; Conditions</a> &nbsp;|&nbsp;  
+      <a href="https://www.shopify.com/?utm_campaign=poweredby&utm_medium=shopify&utm_source=onlinestore">Powered By Shopify</a>
+      &nbsp;|&nbsp; 
+      <a href="{{ route('return.policy') }}">Return Policy</a>
     </div>
-  </footer>
+  </div>
+</div>
+</footer>
 
   <footer class="footer-mobile container w-100 px-5 d-md-none bg-body">
     <div class="row text-center">

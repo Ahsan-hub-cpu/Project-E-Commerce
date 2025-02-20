@@ -70,10 +70,12 @@ class ShopController extends Controller
                     $productsQuery->orderBy('name', 'desc');
                     break;
                 case 'price-low-high':
-                    $productsQuery->orderBy('regular_price', 'asc');
+                    // Changed line: sort by effective price (sale_price if exists, or regular_price)
+                    $productsQuery->orderByRaw("IFNULL(sale_price, regular_price) ASC");
                     break;
                 case 'price-high-low':
-                    $productsQuery->orderBy('regular_price', 'desc');
+                    // Changed line: sort by effective price (sale_price if exists, or regular_price)
+                    $productsQuery->orderByRaw("IFNULL(sale_price, regular_price) DESC");
                     break;
                 default:
                     $productsQuery->orderBy('created_at', 'desc');

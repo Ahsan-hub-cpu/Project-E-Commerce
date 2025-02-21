@@ -12,12 +12,12 @@
 >
   <div 
     style="
-      max-width: 60ch; /* Approximately 10 words per line */
+      max-width: 60ch; 
       width: 100%; 
       text-align: left; 
       line-height: 1.6;
-      font-family: 'Arial', sans-serif; /* Change font here */
-      font-size: 16px; /* Increased font size */
+      font-family: 'Arial', sans-serif;
+      font-size: 16px; 
     "
   >
   <h2 style="text-align: center; margin-bottom: 25px; margin-top: -15px;">Return & Exchange Policy</h2>

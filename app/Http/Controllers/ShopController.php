@@ -107,6 +107,7 @@ class ShopController extends Controller
         } else {
             $products = $productsQuery->paginate(12);
         }
+      
         return view('shop', compact('products', 'categories', 'sizes', 'maxPrice'));
     }
 
@@ -116,4 +117,5 @@ class ShopController extends Controller
         $rproducts = Product::where("slug", "<>", $product_slug)->take(8)->get();
         return view('details', compact("product", "rproducts"));
     }
+
 }

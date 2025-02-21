@@ -374,13 +374,13 @@
   </section>
 </main>
 @endsection
-
 @push('scripts')
 <script>
-$(document).ready(function(){
- 
-  var globalMaxQuantity = {{ $product->quantity }};
-  $('#size').on('change', function() {
+
+  var globalMaxQuantity = {!! json_encode($product->quantity) !!};
+
+  $(document).ready(function(){
+    $('#size').on('change', function() {
       var selectedOption = $(this).find('option:selected');
       var availableQuantity = selectedOption.data('quantity');
       if(availableQuantity === undefined || availableQuantity === null) {
@@ -395,9 +395,9 @@ $(document).ready(function(){
       } else {
           $('.qty-error').text('');
       }
-  });
+    });
 
-  $('.qty-control__increase').on('click', function(){
+    $('.qty-control__increase').on('click', function(){
       var $input = $(this).siblings('input.qty-control__number');
       var currentVal = parseInt($input.val());
       var maxVal = parseInt($input.attr('max'));
@@ -408,9 +408,9 @@ $(document).ready(function(){
       } else {
           $error.text("Only " + maxVal + " items are available.");
       }
-  });
-  
-  $('.qty-control__reduce').on('click', function(){
+    });
+    
+    $('.qty-control__reduce').on('click', function(){
       var $input = $(this).siblings('input.qty-control__number');
       var currentVal = parseInt($input.val());
       var $error = $(this).closest('.qty-control').siblings('.qty-error');
@@ -418,9 +418,9 @@ $(document).ready(function(){
           $input.val(currentVal);
           $error.text('');
       }
-  });
-  
-  $('input.qty-control__number').on('change', function(){
+    });
+    
+    $('input.qty-control__number').on('change', function(){
       var $input = $(this);
       var currentVal = parseInt($input.val());
       var maxVal = parseInt($input.attr('max'));
@@ -434,68 +434,60 @@ $(document).ready(function(){
       if(currentVal < 1 || isNaN(currentVal)){
           $input.val(1);
       }
-  });
+    });
 
-  let selectedSize = null;
+    let selectedSize = null;
     const quantityInput = $('input.qty-control__number');
     const qtyError = $('.qty-error');
 
     $('.size-btn').on('click', function() {
-        const btn = $(this);
-        if(btn.hasClass('sold-out') || btn.prop('disabled')) return;
-        
-        // Update selected size
-        $('.size-btn').removeClass('active');
-        btn.addClass('active');
-        selectedSize = {
-            id: btn.data('size-id'),
-            quantity: btn.data('quantity')
-        };
-        
-        // Update hidden input and quantity limits
-        $('#selected_size').val(selectedSize.id);
-        quantityInput.attr('max', selectedSize.quantity);
-        if(quantityInput.val() > selectedSize.quantity) {
-            quantityInput.val(1);
-            qtyError.text('');
-        }
+      const btn = $(this);
+      if(btn.hasClass('sold-out') || btn.prop('disabled')) return;
+      
+      $('.size-btn').removeClass('active');
+      btn.addClass('active');
+      selectedSize = {
+          id: btn.data('size-id'),
+          quantity: btn.data('quantity')
+      };
+      
+      $('#selected_size').val(selectedSize.id);
+      quantityInput.attr('max', selectedSize.quantity);
+      if(quantityInput.val() > selectedSize.quantity) {
+          quantityInput.val(1);
+          qtyError.text('');
+      }
     });
 
-
     $('.qty-control__increase').on('click', function(){
-        if(!selectedSize) {
-            qtyError.text('Please select a size first');
-            return;
-        }
-        
-        const currentVal = parseInt(quantityInput.val());
-        if(currentVal < selectedSize.quantity) {
-            quantityInput.val(currentVal);
-            qtyError.text('');
-        } else {
-            qtyError.text(`Only ${selectedSize.quantity} items available`);
-        }
+      if(!selectedSize) {
+          qtyError.text('Please select a size first');
+          return;
+      }
+      
+      const currentVal = parseInt(quantityInput.val());
+      if(currentVal < selectedSize.quantity) {
+          quantityInput.val(currentVal);
+          qtyError.text('');
+      } else {
+          qtyError.text(`Only ${selectedSize.quantity} items available`);
+      }
     });
 
     $('.qty-control__reduce').on('click', function(){
-        const currentVal = parseInt(quantityInput.val());
-        if(currentVal > 1) {
-            quantityInput.val(currentVal);
-            qtyError.text('');
-        }
+      const currentVal = parseInt(quantityInput.val());
+      if(currentVal > 1) {
+          quantityInput.val(currentVal);
+          qtyError.text('');
+      }
     });
 
-    // Form submission validation
     $('form[name="addtocart-form"]').on('submit', function(e) {
-        if(!selectedSize) {
-            e.preventDefault();
-            qtyError.text('Please select a size');
-        }
+      if(!selectedSize) {
+          e.preventDefault();
+          qtyError.text('Please select a size');
+      }
     });
-
-
-
-
-});
+  });
 </script>
 @endpush

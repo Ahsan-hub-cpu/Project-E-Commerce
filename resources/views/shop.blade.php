@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('content')
 <style>
-  /* Your existing CSS */
+
   .filled-heart { color: orange; }
   .slideshow-bg { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
   .slideshow-bg__img { width: 100%; height: 100%; object-fit: contain; }
@@ -20,14 +20,14 @@
   }
   .subcategories {
     display: none;
-    position: absolute; /* Ensure it's positioned relative to its parent */
+    position: absolute; 
     top: 100%;
     left: 0;
     min-width: 200px;
     z-index: 1000;
     border-radius: 8px;
-    background-color: #fff; /* Ensure background is white */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add subtle shadow for depth */
+    background-color: #fff; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
   }
   .list-inline-item:hover .subcategories {
     display: block;
@@ -42,7 +42,7 @@
     background-color: #f8f9fa;
     color: #ff6f61 !important;
   }
-  /* Ensure the overall alignment of the list items (category + links) */
+ 
   .category-header .list-inline {
     display: flex;
     justify-content: center;
@@ -51,7 +51,7 @@
   .category-header .list-inline-item {
     display: flex;
     align-items: center;
-    margin: 0 10px; /* Space between list items */
+    margin: 0 10px; 
   }
   .category-header .list-inline-item a {
     display: inline-block;
@@ -63,8 +63,6 @@
     margin-bottom: 0;
   }
   
-  /* Product Card */
-  /* Product Card Adjustments */
   .product-card { 
     background: transparent; 
     border: none; 
@@ -75,22 +73,22 @@
   .product-card:hover { 
     transform: translateY(-3px); 
   }
-  /* Image Wrapper */
+
   .pc__img-wrapper { 
     overflow: hidden; 
     border-radius: 8px; 
     position: relative; 
   }
-  /* Primary & Secondary Image */
+
   .pc__img { 
     width: 100%; 
     height: 100%; 
-    object-fit: contain;  /* Improved scaling */
+    object-fit: contain;  
     border-radius: 8px; 
     transition: transform 0.3s ease; 
-    image-rendering: crisp-edges; /* Enhances image sharpness */
+    image-rendering: crisp-edges; 
   }
-  /* Hover Effect */
+
   .product-card:hover .pc__img { 
     transform: scale(1.05); 
   }
@@ -106,7 +104,7 @@
     border-radius: 8px; 
     image-rendering: crisp-edges; 
   }
-  /* Hover Swap Effect */
+ 
   .pc__img-wrapper:hover .primary-img { 
     opacity: 0; 
   }
@@ -129,7 +127,6 @@
   .filter-section .form-select:hover { border-color: #ff6f61; }
   .filter-section .form-select:focus { border-color: #ff6f61; box-shadow: 0 0 0 2px rgba(255, 111, 97, 0.2); }
 
-  /* Sold Out Badge Style */
   .sold-out-badge {
     position: absolute;
     bottom: 10px;
@@ -144,7 +141,6 @@
   }
 </style>
 
-<!-- Category Header -->
 <div class="category-header bg-light py-3 shadow-sm mb-4">
   <div class="container">
     <ul class="list-inline mb-0 d-flex justify-content-center flex-wrap">
@@ -167,7 +163,6 @@
         </li>
       @endforeach
 
-      <!-- Additional Links: Hot Deals, Featured Products, New Arrivals -->
       <li class="list-inline-item mx-2">
         <a href="{{ route('shop.index', ['filter' => 'hot-deals']) }}" class="text-dark text-decoration-none fw-medium px-3 py-2 rounded">
           Hot Deals
@@ -187,10 +182,8 @@
   </div>
 </div>
 
-<!-- Filters Section -->
 <div class="container mb-4">
   <div class="row">
-    <!-- Size Filter -->
     <div class="col-md-3">
       <select id="size-filter" class="form-select">
         <option value="">Filter by Size</option>
@@ -200,14 +193,12 @@
       </select>
     </div>
 
-    <!-- Price Filter (Button triggers modal) -->
     <div class="col-md-3">
       <button type="button" class="btn btn-outline-secondary w-100" data-bs-toggle="modal" data-bs-target="#priceFilterModal">
           Filter by Price
       </button>
     </div>
 
-    <!-- Sort By Filter -->
     <div class="col-md-3">
       <select id="sort-by" class="form-select">
         <option value="">Sort By</option>
@@ -228,8 +219,6 @@
   </div>
 @endif
 
-
-<!-- Product Count Display -->
 <div class="container mb-3">
   <div class="row">
     <div class="col">
@@ -244,24 +233,28 @@
   </div>
 </div>
 
-<!-- Products Grid -->
 <div class="container">
   <div class="products-grid row row-cols-1 row-cols-md-3 g-4 mt-4">
-    @foreach($products as $product)
-      <div class="col">
+  @foreach($products as $product)
+    <div class="col">
         <div class="product-card card h-100 border-0 bg-transparent">
-          <div class="pc__img-wrapper position-relative">
-            <a href="{{ route('shop.product.details', ['product_slug' => $product->slug]) }}">
-              <!-- Primary Image -->
-              <img loading="lazy" src="{{ asset('uploads/products/') }}/{{ $product->image }}" alt="{{ $product->name }}" class="pc__img primary-img card-img-top rounded">
-              @php
-               $secondaryImages = explode(',', $product->images);
-              @endphp
-              @if(!empty($secondaryImages[0]))
-                <img loading="lazy" src="{{ asset('uploads/products') }}/{{ $secondaryImages[0] }}" 
-                width="330" height="400" alt="{{ $product->name }}" 
-                class="pc__img pc__img-second">
-              @endif
+            <div class="pc__img-wrapper position-relative">
+                <a href="{{ route('shop.product.details', ['product_slug' => $product->slug]) }}">
+                    <img loading="lazy" src="{{ asset('uploads/products/' . $product->image) }}" 
+                        alt="{{ $product->name }}" 
+                        class="pc__img primary-img card-img-top rounded">
+                    
+                    @php
+                        $galleryImages = explode(',', $product->images); // Split gallery images
+                        $hoverImage = count($galleryImages) > 0 ? $galleryImages[0] : null; // Pick the first one
+                    @endphp
+                    @if($hoverImage)
+                        <img loading="lazy" src="{{ asset('uploads/products/' . $hoverImage) }}" 
+                            width="330" height="400" 
+                            alt="{{ $product->name }}" 
+                            class="pc__img pc__img-second">
+                    @endif
+                </a>
             </a>
             @if($product->quantity <= 0)
               <div class="sold-out-badge">Sold Out</div>
@@ -329,8 +322,6 @@
   </div>
 </div>
 
-<!-- Clear Filter & Pagination -->
-
 @if(!request()->has('size') && !request()->has('price_from') && !request()->has('price_to') && !request()->has('sort') && !request()->has('subcategory'))
   <div class="divider"></div>
   <div class="flex items-center justify-between flex-wrap gap10 wgp pagination">
@@ -338,7 +329,6 @@
   </div>
 @endif
 
-<!-- Price Filter Modal -->
 <div class="modal fade" id="priceFilterModal" tabindex="-1" aria-labelledby="priceFilterModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">

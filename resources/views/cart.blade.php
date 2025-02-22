@@ -64,8 +64,9 @@
                         </thead>
                         <tbody>
                         @php
-                            // Set the fixed shipping cost once.
-                            $shippingCost = 250;
+                            // Set the fixed shipping cost conditionally based on cart subtotal.
+                            $cartSubtotal = (float) str_replace(',', '', Cart::instance('cart')->subtotal());
+                            $shippingCost = ($cartSubtotal > 7000) ? 0 : 250;
                         @endphp
                             @foreach ($cartItems as $cartItem)
                                 <tr>
@@ -166,6 +167,11 @@
                     <div class="sticky-content">
                         <div class="shopping-cart__totals">
                             <h3>Cart Totals</h3>
+                            @php
+                                // Recalculate cart subtotal and shipping cost for totals
+                                $cartSubtotal = (float) str_replace(',', '', Cart::instance('cart')->subtotal());
+                                $shippingCost = ($cartSubtotal > 7000) ? 0 : 250;
+                            @endphp
                             @if(Session()->has('discounts'))
                                 <table class="cart-totals">
                                     <tbody>
@@ -174,12 +180,12 @@
                                             <td>PKR {{ Cart::instance('cart')->subtotal() }}</td>
                                         </tr>
                                         <tr>
-                                            <th>Discount {{ Session()->get("coupon")["code"] }}</th>
-                                            <td>-PKR {{ Session()->get("discounts")["discount"] }}</td>
+                                            <th>Discount {{ Session::get("coupon")["code"] }}</th>
+                                            <td>-PKR {{ Session::get("discounts")["discount"] }}</td>
                                         </tr>
                                         <tr>
                                             <th>Subtotal After Discount</th>
-                                            <td>PKR {{ Session()->get("discounts")["subtotal"] }}</td>
+                                            <td>PKR {{ Session::get("discounts")["subtotal"] }}</td>
                                         </tr>
                                         <tr>
                                             <th>SHIPPING</th>
@@ -187,11 +193,10 @@
                                         </tr>
                                         <tr>
                                             <th>VAT</th>
-                                            <td>PKR {{ Session()->get("discounts")["tax"] }}</td>
+                                            <td>PKR {{ Session::get("discounts")["tax"] }}</td>
                                         </tr>
                                         <tr class="cart-total">
                                             @php
-                                                // Remove commas before arithmetic
                                                 $discountTotal = (float) str_replace(',', '', Session::get("discounts")["total"]);
                                                 $finalTotal = $discountTotal + $shippingCost;
                                             @endphp

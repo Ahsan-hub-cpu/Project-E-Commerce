@@ -90,6 +90,16 @@
                   <td>PKR {{$order->tax}}</td>
                 </tr>
                 <tr>
+                  <th>Shipping</th>
+                  <td>
+                      @if($order->shipping_cost == 0)
+                        Free
+                      @else
+                        PKR {{$order->shipping_cost}}
+                      @endif
+                  </td>
+                </tr>
+                <tr>
                   <th>TOTAL</th>
                   <td>PKR {{$order->total}}</td>
                 </tr>
@@ -100,6 +110,4 @@
       </div>
     </section>
   </main>
-@endsection 
-
-
+@endsection

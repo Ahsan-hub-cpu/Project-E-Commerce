@@ -13,7 +13,6 @@ class ShopController extends Controller
     {
         $productsQuery = Product::query();
         
-        // Handle additional filters
         if ($request->query('filter') === 'featured') {
             $productsQuery->where('featured', true);
         } elseif ($request->query('filter') === 'new-arrivals') {
@@ -34,27 +33,22 @@ class ShopController extends Controller
             });
         }
 
-        // Price filtering using price_from and price_to (from modal)
         if ($request->has('price_from') || $request->has('price_to')) {
             $priceFrom = $request->get('price_from', 0);
             $priceTo = $request->get('price_to', null);
 
-            // If price_to is not provided, default it to the dynamic highest price
             if (!$priceTo) {
                 $maxRegular = Product::max('regular_price');
                 $maxSale = Product::whereNotNull('sale_price')->max('sale_price');
                 $priceTo = max($maxRegular, $maxSale);
             }
 
-            // Use IFNULL to compare sale_price (if exists) or regular_price otherwise
             $productsQuery->whereRaw("IFNULL(sale_price, regular_price) BETWEEN ? AND ?", [$priceFrom, $priceTo]);
         } elseif ($request->has('price')) {
-            // Fallback if using the old price filter format (e.g., "0-50")
             $priceRange = explode('-', $request->price);
             $productsQuery->whereBetween('regular_price', [$priceRange[0], $priceRange[1]]);
         }
 
-        // Sorting
         if ($request->has('sort')) {
             switch ($request->sort) {
                 case 'newest':
@@ -70,11 +64,11 @@ class ShopController extends Controller
                     $productsQuery->orderBy('name', 'desc');
                     break;
                 case 'price-low-high':
-                    // Changed line: sort by effective price (sale_price if exists, or regular_price)
+                   
                     $productsQuery->orderByRaw("IFNULL(sale_price, regular_price) ASC");
                     break;
                 case 'price-high-low':
-                    // Changed line: sort by effective price (sale_price if exists, or regular_price)
+        
                     $productsQuery->orderByRaw("IFNULL(sale_price, regular_price) DESC");
                     break;
                 default:
@@ -85,16 +79,13 @@ class ShopController extends Controller
             $productsQuery->orderBy('created_at', 'desc');
         }
 
-        // Get categories and sizes for filters
         $categories = Category::with('subCategories')->get();
         $sizes = Sizes::all();
 
-        // Compute the dynamic highest price among all products:
         $maxRegular = Product::max('regular_price');
         $maxSale = Product::whereNotNull('sale_price')->max('sale_price');
         $maxPrice = max($maxRegular, $maxSale);
 
-        // If any filters are applied, get all matching products; otherwise, paginate
         if (
             $request->has('size') ||
             $request->has('price') ||

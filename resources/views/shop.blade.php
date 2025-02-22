@@ -361,17 +361,17 @@
 @push('scripts')
 <script>
 $(function(){
-  // Handle size filter
+
   $('#size-filter').on('change', function() {
     updateUrl('size', $(this).val());
   });
   
-  // Handle sort by filter
+
   $('#sort-by').on('change', function() {
     updateUrl('sort', $(this).val());
   });
   
-  // Handle modal Apply button for price filter
+
   $('#apply-price-filter-modal').on('click', function() {
     var priceFrom = $('#price-from-modal').val();
     var priceTo = $('#price-to-modal').val();
@@ -394,7 +394,7 @@ $(function(){
     window.location.href = url.toString();
   });
   
-  // Helper function to update a single query parameter
+  
   function updateUrl(key, value) {
     var url = new URL(window.location.href);
     var searchParams = new URLSearchParams(url.search);

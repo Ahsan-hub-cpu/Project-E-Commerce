@@ -3,8 +3,6 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'Laravel') }}</title>
@@ -42,10 +40,10 @@
       <path
         d="M7.125 3.2959C5.375 3.2959 3.98047 4.71777 3.98047 6.44043C3.98047 8.19043 5.375 9.58496 7.125 9.58496C8.84766 9.58496 10.2695 8.19043 10.2695 6.44043C10.2695 4.71777 8.84766 3.2959 7.125 3.2959ZM7.125 8.49121C6.00391 8.49121 5.07422 7.58887 5.07422 6.44043C5.07422 5.31934 5.97656 4.41699 7.125 4.41699C8.24609 4.41699 9.14844 5.31934 9.14844 6.44043C9.14844 7.58887 8.24609 8.49121 7.125 8.49121ZM11.1172 3.18652C11.1172 2.77637 10.7891 2.44824 10.3789 2.44824C9.96875 2.44824 9.64062 2.77637 9.64062 3.18652C9.64062 3.59668 9.96875 3.9248 10.3789 3.9248C10.7891 3.9248 11.1172 3.59668 11.1172 3.18652ZM13.1953 3.9248C13.1406 2.94043 12.9219 2.06543 12.2109 1.35449C11.5 0.643555 10.625 0.424805 9.64062 0.370117C8.62891 0.31543 5.59375 0.31543 4.58203 0.370117C3.59766 0.424805 2.75 0.643555 2.01172 1.35449C1.30078 2.06543 1.08203 2.94043 1.02734 3.9248C0.972656 4.93652 0.972656 7.97168 1.02734 8.9834C1.08203 9.96777 1.30078 10.8154 2.01172 11.5537C2.75 12.2646 3.59766 12.4834 4.58203 12.5381C5.59375 12.5928 8.62891 12.5928 9.64062 12.5381C10.625 12.4834 11.5 12.2646 12.2109 11.5537C12.9219 10.8154 13.1406 9.96777 13.1953 8.9834C13.25 7.97168 13.25 4.93652 13.1953 3.9248ZM11.8828 10.0498C11.6914 10.5967 11.2539 11.0068 10.7344 11.2256C9.91406 11.5537 8 11.4717 7.125 11.4717C6.22266 11.4717 4.30859 11.5537 3.51562 11.2256C2.96875 11.0068 2.55859 10.5967 2.33984 10.0498C2.01172 9.25684 2.09375 7.34277 2.09375 6.44043C2.09375 5.56543 2.01172 3.65137 2.33984 2.83105C2.55859 2.31152 2.96875 1.90137 3.51562 1.68262C4.30859 1.35449 6.22266 1.43652 7.125 1.43652C8 1.43652 9.91406 1.35449 10.7344 1.68262C11.2539 1.87402 11.6641 2.31152 11.8828 2.83105C12.2109 3.65137 12.1289 5.56543 12.1289 6.44043C12.1289 7.34277 12.2109 9.25684 11.8828 10.0498Z" />
     </symbol>
-    <symbol id="icon_youtube" viewBox="0 0 16 11">
+    {{-- <symbol id="icon_youtube" viewBox="0 0 16 11">
       <path
         d="M15.0117 1.8584C14.8477 1.20215 14.3281 0.682617 13.6992 0.518555C12.5234 0.19043 7.875 0.19043 7.875 0.19043C7.875 0.19043 3.19922 0.19043 2.02344 0.518555C1.39453 0.682617 0.875 1.20215 0.710938 1.8584C0.382812 3.00684 0.382812 5.46777 0.382812 5.46777C0.382812 5.46777 0.382812 7.90137 0.710938 9.07715C0.875 9.7334 1.39453 10.2256 2.02344 10.3896C3.19922 10.6904 7.875 10.6904 7.875 10.6904C7.875 10.6904 12.5234 10.6904 13.6992 10.3896C14.3281 10.2256 14.8477 9.7334 15.0117 9.07715C15.3398 7.90137 15.3398 5.46777 15.3398 5.46777C15.3398 5.46777 15.3398 3.00684 15.0117 1.8584ZM6.34375 7.68262V3.25293L10.2266 5.46777L6.34375 7.68262Z" />
-    </symbol>
+    </symbol> --}}
     <symbol id="icon_pinterest" viewBox="0 0 14 15">
       <path
         d="M13.5625 7.44043C13.5625 3.69434 10.5273 0.65918 6.78125 0.65918C3.03516 0.65918 0 3.69434 0 7.44043C0 10.3389 1.77734 12.7725 4.29297 13.7568C4.23828 13.2373 4.18359 12.417 4.32031 11.8154C4.45703 11.2959 5.11328 8.45215 5.11328 8.45215C5.11328 8.45215 4.92188 8.04199 4.92188 7.44043C4.92188 6.51074 5.46875 5.7998 6.15234 5.7998C6.72656 5.7998 7 6.2373 7 6.75684C7 7.33105 6.61719 8.20605 6.42578 9.02637C6.28906 9.68262 6.78125 10.2295 7.4375 10.2295C8.64062 10.2295 9.57031 8.97168 9.57031 7.13965C9.57031 5.49902 8.39453 4.37793 6.75391 4.37793C4.8125 4.37793 3.69141 5.82715 3.69141 7.30371C3.69141 7.90527 3.91016 8.53418 4.18359 8.8623C4.23828 8.91699 4.23828 8.99902 4.23828 9.05371C4.18359 9.27246 4.04688 9.7373 4.04688 9.81934C4.01953 9.95605 3.9375 9.9834 3.80078 9.92871C2.95312 9.51855 2.43359 8.28809 2.43359 7.27637C2.43359 5.14355 3.99219 3.1748 6.91797 3.1748C9.26953 3.1748 11.1016 4.87012 11.1016 7.1123C11.1016 9.43652 9.625 11.3232 7.57422 11.3232C6.89062 11.3232 6.23438 10.9678 6.01562 10.5303C6.01562 10.5303 5.6875 11.8428 5.60547 12.1436C5.44141 12.7451 5.03125 13.4834 4.75781 13.9209C5.38672 14.1396 6.07031 14.2217 6.78125 14.2217C10.5273 14.2217 13.5625 11.1865 13.5625 7.44043Z" />
@@ -396,10 +394,10 @@ body {
 
 .fab-icons {
   position: absolute;
-  bottom: 100%;           /* Icons appear above the button */
+  bottom: 100%;          
   left: 50%;              
   transform: translateX(-50%);
-  display: none;          /* Hidden by default; toggled via JS or hover */
+  display: none;         
   flex-direction: column; 
   gap: 8px;
   opacity: 1;
@@ -446,11 +444,11 @@ body {
 }
 
 .fab-icon .tooltip {
-  visibility: hidden;           /* Hidden by default */
-  opacity: 0;                   /* Invisible by default */
+  visibility: hidden;       
+  opacity: 0;                 
   position: absolute;
-  top: 50%;                     /* Align with icon’s vertical center */
-  left: 110%;                   /* Position tooltip to the right */
+  top: 50%;                    
+  left: 110%;                
   transform: translateY(-50%);
   background-color: rgba(0, 0, 0, 0.8);
   color: #fff;
@@ -459,18 +457,18 @@ body {
   white-space: nowrap;
   font-size: 14px;
   transition: opacity 0.3s;
-  pointer-events: none;         /* So it doesn’t block hover events */
+  pointer-events: none;      
 }
 
-/* Show the tooltip on hover */
+
 .fab-icon:hover .tooltip {
   visibility: visible;
   opacity: 1;
 }
 
-/* Toggle button styling (optional) */
+
 .fab-button {
-   /* Hide it if you don't need a toggle effect */
+
   position: relative;
   width: 40px;
   height: 40px;
@@ -484,7 +482,47 @@ body {
   cursor: pointer;
   margin-left: 2px;
 }
+
+.top-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f5f5f5; 
+  padding: 8px 0;
+  font-size: 14px;
+  text-align: center;
+
+}
+
+.top-bar__text {
+  margin: 0;
+  font-weight: bold;
+  margin-top: 1%;
+}
+
+@media (max-width: 768px) {
+  .top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+    height: 35px; /* Adjust height as needed */
+    font-size: 12px;
+  }
+  /* Ensure the mobile header is pushed down so it doesn't overlap the fixed top bar */
+  .header-mobile {
+    margin-top: 35px; /* Same as the top bar height */
+  }
+}
   </style>
+   
+   <div class="top-bar">
+    <div class="container">
+      <p class="top-bar__text">Free shipping on orders more than PKR 7000!</p>
+    </div>
+  </div>
+
   <div class="header-mobile header_sticky">
     <div class="container d-flex align-items-center h-100">
       <a class="mobile-nav-activator d-block position-relative" href="#">
@@ -533,6 +571,8 @@ body {
         </form>
       </div>
 
+      
+
       <div class="container">
         <div class="overflow-hidden">
           <ul class="navigation__list list-unstyled position-relative">
@@ -557,7 +597,7 @@ body {
 
       <ul class="container social-links list-unstyled d-flex flex-wrap mb-0">
   <li>
-    <a href="#" class="footer__social-link d-block ps-0">
+    <a href="https://www.facebook.com/share/15TNAxTLLJ/?mibextid=wwXIfr" class="footer__social-link d-block ps-0">
       <svg class="svg-icon svg-icon_facebook" width="9" height="15" viewBox="0 0 9 15" xmlns="http://www.w3.org/2000/svg">
         <use href="#icon_facebook" />
       </svg>
@@ -565,7 +605,7 @@ body {
   </li>
 
   <li>
-    <a href="#" class="footer__social-link d-block">
+    <a href="https://www.instagram.com/trakkiez.wear?igsh=MXNqZG5xYW1qN2xrYQ==" class="footer__social-link d-block">
       <svg class="svg-icon svg-icon_instagram" width="14" height="13" viewBox="0 0 14 13" xmlns="http://www.w3.org/2000/svg">
         <use href="#icon_instagram" />
       </svg>
@@ -574,14 +614,11 @@ body {
 
 
   <li>
-    <a href="#" class="footer__social-link d-block">
-      <svg class="svg-icon svg-icon_youtube" width="16" height="11" viewBox="0 0 16 11" xmlns="http://www.w3.org/2000/svg">
-        <path d="M15.0117 1.8584C14.8477 1.20215 14.3281 0.682617 13.6992 0.518555C12.5234 0.19043 7.875 0.19043 7.875 0.19043C7.875 0.19043 3.19922 0.19043 2.02344 0.518555C1.39453 0.682617 0.875 1.20215 0.710938 1.8584C0.382812 3.00684 0.382812 5.46777 0.382812 5.46777C0.382812 5.46777 0.382812 7.90137 0.710938 9.07715C0.875 9.7334 1.39453 10.2256 2.02344 10.3896C3.19922 10.6904 7.875 10.6904 7.875 10.6904C7.875 10.6904 12.5234 10.6904 13.6992 10.3896C14.3281 10.2256 14.8477 9.7334 15.0117 9.07715C15.3398 7.90137 15.3398 5.46777 15.3398 5.46777C15.3398 5.46777 15.3398 3.00684 15.0117 1.8584ZM6.34375 7.68262V3.25293L10.2266 5.46777L6.34375 7.68262Z" />
-      </svg>
+    <a href="https://www.tiktok.com/@trakkiezwear?_t=ZS-8t3QFgCyjjE&_r=1" class="footer__social-link d-block">
+      <i class="fa-brands fa-tiktok"></i>
     </a>
   </li>
 </ul>
-
       </div>
     </nav>
   </div>
@@ -717,14 +754,6 @@ body {
                 </svg>
               </a>
             </li>
-            <!-- <li>
-              <a href="#" class="footer__social-link d-block">
-                <svg class="svg-icon svg-icon_twitter" width="14" height="13" viewBox="0 0 14 13"
-                  xmlns="http://www.w3.org/2000/svg">
-                  <use href="#icon_twitter" />
-                </svg>
-              </a>
-            </li> -->
             <li>
               <a href="https://www.instagram.com/trakkiez.wear?igsh=MXNqZG5xYW1qN2xrYQ==" class="footer__social-link d-block">
                 <svg class="svg-icon svg-icon_instagram" width="14" height="13" viewBox="0 0 14 13"
@@ -735,11 +764,7 @@ body {
             </li>
             <li>
               <a href="https://www.tiktok.com/@trakkiezwear?_t=ZS-8t3QFgCyjjE&_r=1" class="footer__social-link d-block">
-                <svg class="svg-icon svg-icon_youtube" width="16" height="11" viewBox="0 0 16 11"
-                  xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    d="M15.0117 1.8584C14.8477 1.20215 14.3281 0.682617 13.6992 0.518555C12.5234 0.19043 7.875 0.19043 7.875 0.19043C7.875 0.19043 3.19922 0.19043 2.02344 0.518555C1.39453 0.682617 0.875 1.20215 0.710938 1.8584C0.382812 3.00684 0.382812 5.46777 0.382812 5.46777C0.382812 5.46777 0.382812 7.90137 0.710938 9.07715C0.875 9.7334 1.39453 10.2256 2.02344 10.3896C3.19922 10.6904 7.875 10.6904 7.875 10.6904C7.875 10.6904 12.5234 10.6904 13.6992 10.3896C14.3281 10.2256 14.8477 9.7334 15.0117 9.07715C15.3398 7.90137 15.3398 5.46777 15.3398 5.46777C15.3398 5.46777 15.3398 3.00684 15.0117 1.8584ZM6.34375 7.68262V3.25293L10.2266 5.46777L6.34375 7.68262Z" />
-                </svg>
+                <i class="fa-brands fa-tiktok"></i>
               </a>
             </li>
           </ul>
@@ -749,9 +774,6 @@ body {
           <h6 class="sub-menu__title text-uppercase">Company</h6>
           <ul class="sub-menu__list list-unstyled">
             <li class="sub-menu__item"><a href="{{ route('about.us') }}" class="menu-link menu-link_us-s">About Us</a></li>
-            <!-- <li class="sub-menu__item"><a href="#" class="menu-link menu-link_us-s">Careers</a></li>
-            <li class="sub-menu__item"><a href="#" class="menu-link menu-link_us-s">Affiliates</a></li>
-            <li class="sub-menu__item"><a href="blog_list1.html" class="menu-link menu-link_us-s">Blog</a></li> -->
             <li class="sub-menu__item"><a href="{{route('home.contact')}}" class="menu-link menu-link_us-s">Contact Us</a></li>
           </ul>
         </div>
@@ -759,37 +781,10 @@ body {
         <div class="footer-column footer-menu mb-4 mb-lg-0">
           <h6 class="sub-menu__title text-uppercase">Shop</h6>
           <ul class="sub-menu__list list-unstyled">
-            <!-- <li class="sub-menu__item"><a href="shop2.html" class="menu-link menu-link_us-s">New Arrivals</a></li>
-            <li class="sub-menu__item"><a href="shop3.html" class="menu-link menu-link_us-s">Accessories</a></li>
-            <li class="sub-menu__item"><a href="shop4.html" class="menu-link menu-link_us-s">Men</a></li>
-            <li class="sub-menu__item"><a href="shop5.html" class="menu-link menu-link_us-s">Women</a></li> -->
             <li class="sub-menu__item"><a href="{{route('shop.index')}}" class="menu-link menu-link_us-s">Shop All</a></li>
           </ul>
         </div>
-<!-- 
-        <div class="footer-column footer-menu mb-4 mb-lg-0">
-          <h6 class="sub-menu__title text-uppercase">Help</h6>
-          <ul class="sub-menu__list list-unstyled">
-            <li class="sub-menu__item"><a href="#" class="menu-link menu-link_us-s">Customer Service</a></li>
-            <li class="sub-menu__item"><a href="account_dashboard.html" class="menu-link menu-link_us-s">My Account</a>
-            </li>
-            <li class="sub-menu__item"><a href="store_location.html" class="menu-link menu-link_us-s">Find a Store</a>
-            </li>
-            <li class="sub-menu__item"><a href="#" class="menu-link menu-link_us-s">Legal & Privacy</a></li>
-            <li class="sub-menu__item"><a href="#" class="menu-link menu-link_us-s">Gift Card</a></li>
-          </ul>
-        </div> -->
-<!-- 
-        <div class="footer-column footer-menu mb-4 mb-lg-0">
-          <h6 class="sub-menu__title text-uppercase">Categories</h6>
-          <ul class="sub-menu__list list-unstyled">
-            <li class="sub-menu__item"><a href="#" class="menu-link menu-link_us-s">Shirts</a></li>
-            <li class="sub-menu__item"><a href="#" class="menu-link menu-link_us-s">Jeans</a></li>
-            <li class="sub-menu__item"><a href="#" class="menu-link menu-link_us-s">Shoes</a></li>
-            <li class="sub-menu__item"><a href="#" class="menu-link menu-link_us-s">Bags</a></li>
-            <li class="sub-menu__item"><a href="#" class="menu-link menu-link_us-s">Shop All</a></li>
-          </ul>
-        </div> -->
+
       </div>
     </div>
 
@@ -798,9 +793,7 @@ body {
     <span class="me-auto d-flex align-items-center">
       ©2025 Trakkiez Store
       <div class="fab-container ms-3">
-        <!-- Icons container -->
         <div id="fabIcons" class="fab-icons">
-          <!-- WhatsApp Icon -->
           <a 
             href="https://wa.me/923249485029" 
             target="_blank" 
@@ -808,21 +801,18 @@ body {
             title="WhatsApp"
           >
             <i class="fab fa-whatsapp"></i>
-            <!-- Tooltip text -->
             <span class="tooltip">WhatsApp</span>
           </a>
-          <!-- Phone Icon -->
           <a 
             href="tel:923249485029" 
             class="fab-icon phone"
             title="Call Us"
           >
             <i class="fas fa-phone"></i>
-            <!-- Tooltip text -->
             <span class="tooltip">Call Us</span>
           </a>
         </div>
-        <!-- Toggle Button (if you want to open/close the icons) -->
+
         <div id="fabButton" class="fab-button">
           <i class="fas fa-times"></i>
         </div>
@@ -896,17 +886,16 @@ body {
         if (searchQuery.length > 2) {
           $.ajax({
             type: "GET",
-            url: "{{ route('home.search') }}", // Blade route must be outside of backticks
+            url: "{{ route('home.search') }}", 
             data: { query: searchQuery },
             dataType: "json",
             success: function(data) {
-              $("#box-content-search").html(""); // Clear previous results
+              $("#box-content-search").html("");
 
               $.each(data, function(index, item) {
                 var url = "{{ route('shop.product.details', ['product_slug' => '__slug__']) }}";
-                url = url.replace('__slug__', item.slug); // Replace placeholder with actual slug
-
-                var imageUrl = "{{ asset('uploads/products/thumbnails') }}/" + item.image; // Correct asset path
+                url = url.replace('__slug__', item.slug); 
+                var imageUrl = "{{ asset('uploads/products/thumbnails') }}/" + item.image; 
 
                 $("#box-content-search").append(`
                   <li>
@@ -936,12 +925,10 @@ body {
   </script>
   <script src="{{asset('assets/js/theme.js')}}"></script>
   <script>
-    // Ensure the FAB always remains visible after theme.js loads
     const fabButton = document.getElementById('fabButton');
     const fabIcons = document.getElementById('fabIcons');
 
     fabButton.addEventListener('click', () => {
-      // Toggle display of the hidden icons
       if (fabIcons.style.display === 'flex') {
         fabIcons.style.display = 'none';
       } else {
@@ -950,8 +937,6 @@ body {
     });
 
     const fabContainer = document.querySelector('.fab-container');
-
-    // Always keep the FAB visible on scroll
     window.addEventListener('scroll', () => {
       fabContainer.style.opacity = '1';
       fabContainer.style.visibility = 'visible';

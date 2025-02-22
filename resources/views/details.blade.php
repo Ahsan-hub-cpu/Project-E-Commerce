@@ -484,7 +484,6 @@ $(document).ready(function(){
         }
     });
 
-    // Form submission validation
     $('form[name="addtocart-form"]').on('submit', function(e) {
         if(!selectedSize) {
             e.preventDefault();

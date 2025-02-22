@@ -156,6 +156,13 @@
                         </div> 
                     @endif                   
                 </div>
+                
+                @php
+                    // Calculate cart subtotal and shipping cost conditionally.
+                    $cartSubtotal = (float) str_replace(',', '', Cart::instance('cart')->subtotal());
+                    $shippingCost = ($cartSubtotal > 7000) ? 0 : 250;
+                @endphp
+
                 <div class="checkout__totals-wrapper">
                     <div class="sticky-content">
                         <div class="checkout__totals">
@@ -180,6 +187,7 @@
                                     @endforeach                                    
                                 </tbody>
                             </table>
+                            
                             @if(session()->has('discounts'))
                                 <table class="checkout-totals">
                                     <tbody>
@@ -194,10 +202,16 @@
                                         <tr>
                                             <th>Subtotal After Discount</th>
                                             <td class="text-right">PKR {{ session()->get("discounts")["subtotal"] }}</td>
-                                        </tr>   
+                                        </tr>
                                         <tr>
                                             <th>SHIPPING</th>
-                                            <td class="text-right">Free</td>
+                                            <td class="text-right">
+                                                @if($shippingCost == 0)
+                                                    Free
+                                                @else
+                                                    PKR {{ number_format($shippingCost, 2) }}
+                                                @endif
+                                            </td>
                                         </tr>                             
                                         <tr>
                                             <th>VAT</th>
@@ -205,7 +219,9 @@
                                         </tr>
                                         <tr class="cart-total">
                                             <th>Total</th>
-                                            <td class="text-right">PKR {{ session()->get("discounts")["total"] }}</td>
+                                            <td class="text-right">
+                                                PKR {{ number_format((float) str_replace(',', '', session()->get("discounts")["total"]) + $shippingCost, 2) }}
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -218,7 +234,13 @@
                                         </tr>
                                         <tr>
                                             <th>SHIPPING</th>
-                                            <td class="text-right">Free</td>
+                                            <td class="text-right">
+                                                @if($shippingCost == 0)
+                                                    Free
+                                                @else
+                                                    PKR {{ number_format($shippingCost, 2) }}
+                                                @endif
+                                            </td>
                                         </tr>
                                         <tr>
                                             <th>VAT</th>
@@ -226,7 +248,9 @@
                                         </tr>
                                         <tr class="cart-total">
                                             <th>TOTAL</th>
-                                            <td class="text-right">PKR {{ Cart::instance('cart')->total() }}</td>
+                                            <td class="text-right">
+                                                PKR {{ number_format((float) str_replace(',', '', Cart::instance('cart')->total()) + $shippingCost, 2) }}
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -236,15 +260,15 @@
                             <div class="form-check">
                                 <input class="form-check-input form-check-input_fill" type="radio" name="mode" value="card" id="mode_1">
                                 <label class="form-check-label" for="mode_1">
-                                    Debit or Credit Card                                    
+                                    Debit or Credit Card (Coming Soon)                                 
                                 </label>
                             </div> 
-                            <div class="form-check">
+                            {{-- <div class="form-check">
                                 <input class="form-check-input form-check-input_fill" type="radio" name="mode" value="paypal" id="mode_2">
                                 <label class="form-check-label" for="mode_2">
                                     Paypal                                    
                                 </label>
-                            </div>
+                            </div> --}}
                             <div class="form-check">
                                 <input class="form-check-input form-check-input_fill" type="radio" name="mode" value="cod" checked id="mode_3">
                                 <label class="form-check-label" for="mode_3">
@@ -252,7 +276,7 @@
                                 </label>
                             </div>
                             <div class="policy-text">
-                                Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our <a href="terms.html" target="_blank">privacy policy</a>.
+                                Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our <a href="{{ route('privacy.policy') }}" target="_blank">privacy policy</a>.
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary">PLACE ORDER</button>

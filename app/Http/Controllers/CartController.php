@@ -11,7 +11,7 @@ use App\Models\OrderItem;
 use App\Models\Product_Variations;
 use App\Models\Product;
 use App\Models\Transaction;
-use Cart;
+use Surfsidemedia\Shoppingcart\Facades\Cart;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\OrderConfirmation;
@@ -112,26 +112,21 @@ class CartController extends Controller
         // Update the quantity in the cart.
         Cart::instance('cart')->update($rowId, ['qty' => $newQuantity]);
         
-        // Run any discount calculations (if applicable).
         $this->calculateDiscounts();
-        
-        // Get the updated cart item.
         $updatedCartItem = Cart::instance('cart')->get($rowId);
 
-        // Set the fixed shipping cost.
-        $shippingCost = 250; // Fixed shipping cost in PKR
+        // Calculate shipping cost conditionally.
+        $cartSubtotal = (float) str_replace(',', '', Cart::instance('cart')->subtotal());
+        $shippingCost = ($cartSubtotal > 7000) ? 0 : 250;
 
-        // Recalculate totals from the cart.
-        // These methods should return the totals without any shipping charge.
         $subtotal = (float) str_replace(',', '', Cart::instance('cart')->subtotal());
         $tax      = (float) str_replace(',', '', Cart::instance('cart')->tax());
-        $total    = (float) str_replace(',', '', Cart::instance('cart')->total()); // Cart total (without shipping)
+        $total    = (float) str_replace(',', '', Cart::instance('cart')->total()); 
 
-        // Add the fixed shipping cost only once.
+        // Add shipping cost to total.
         $finalTotal = $total + $shippingCost;
 
         // Render the updated totals partial view with the calculated values.
-        // Make sure your partial view uses the $finalTotal variable directly.
         $totals = view('partials.cart-totals', compact('shippingCost', 'subtotal', 'tax', 'finalTotal'))->render();
 
         return response()->json([
@@ -219,10 +214,13 @@ class CartController extends Controller
         }
     }
 
-    // In setAmountForCheckout, add shipping cost to the total.
+    // In setAmountForCheckout, add shipping cost to the total conditionally.
     public function setAmountForCheckout()
     {
-        $shippingCost = 250; // Fixed shipping cost
+        // Calculate cart subtotal and set shipping cost accordingly.
+        $cartSubtotal = (float) str_replace(',', '', Cart::instance('cart')->subtotal());
+        $shippingCost = ($cartSubtotal > 7000) ? 0 : 250;
+        
         if (Cart::instance('cart')->count() > 0) {
             if (session()->has('coupon')) {
                 // Get discount totals, remove commas, then add shipping.
@@ -312,25 +310,27 @@ class CartController extends Controller
                 }
             }
 
-            $shippingCost = 250;
+            // Calculate shipping cost based on cart subtotal.
+            $cartSubtotal = (float) str_replace(',', '', Cart::instance('cart')->subtotal());
+            $shippingCost = ($cartSubtotal > 7000) ? 0 : 250;
 
             // Create the order
             $order = new Order();
-            $order->email    = $request->email;
-            $order->subtotal = $subtotal;
-            $order->discount = $discount;
-            $order->tax      = $tax;
-            $order->total    = $total; // This total includes shipping
-            $order->shipping_cost = $shippingCost;
-            $order->name     = $request->name;
-            $order->phone    = $request->phone;
-            $order->locality = $request->locality;
-            $order->address  = $request->address;
-            $order->city     = $request->city;
-            $order->state    = $request->state;
-            $order->country  = 'N/A';
-            $order->landmark = $request->landmark;
-            $order->zip      = $request->zip;
+            $order->email          = $request->email;
+            $order->subtotal       = $subtotal;
+            $order->discount       = $discount;
+            $order->tax            = $tax;
+            $order->total          = $total; // This total includes shipping
+            $order->shipping_cost  = $shippingCost;
+            $order->name           = $request->name;
+            $order->phone          = $request->phone;
+            $order->locality       = $request->locality;
+            $order->address        = $request->address;
+            $order->city           = $request->city;
+            $order->state          = $request->state;
+            $order->country        = 'N/A';
+            $order->landmark       = $request->landmark;
+            $order->zip            = $request->zip;
             $order->save();
 
             // Process order items and reduce stock (both size-specific and global quantities)

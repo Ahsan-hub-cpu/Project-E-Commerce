@@ -26,32 +26,31 @@ class CartController extends Controller
 
     public function addToCart(Request $request)
     {
-        // Validate that a size is selected and quantity is at least 1.
+   
         $request->validate([
             'size_id'  => 'required|exists:sizes,id',
             'quantity' => 'required|integer|min:1'
         ]);
 
-        // Find the selected size.
+    
         $size = Sizes::find($request->size_id);
         if (!$size) {
             return redirect()->back()->with('error', 'Invalid size selection.');
         }
 
-        // Retrieve the product variation for the given product and size.
+
         $productVariation = Product_Variations::where('product_id', $request->id)
-                                               ->where('size_id', $size->id)
-                                               ->first();
+            ->where('size_id', $size->id)
+            ->first();
         if (!$productVariation) {
             return redirect()->back()->with('error', 'Product variation not found.');
         }
 
-        // Check size-specific stock.
+   
         if ($request->quantity > $productVariation->quantity) {
             return redirect()->back()->with('error', 'Sorry, only ' . $productVariation->quantity . ' items are available in this size.');
         }
 
-        // Retrieve the product and check global stock.
         $product = Product::find($request->id);
         if (!$product) {
             return redirect()->back()->with('error', 'Product not found.');
@@ -60,18 +59,17 @@ class CartController extends Controller
             return redirect()->back()->with('error', 'Sorry, only ' . $product->quantity . ' items are available in stock.');
         }
 
-        // Add the product to the cart, passing extra options:
         Cart::instance('cart')->add(
-            $request->id,                         // Product ID.
-            $request->name,                       // Product Name.
-            $request->quantity,                   // Quantity.
-            $request->price,                      // Price.
+            $request->id,                        
+            $request->name,                      
+            $request->quantity,                   
+            $request->price,                    
             [
-                'size'                => $size->name,               // Size Name.
-                'size_id'             => $size->id,                 // Size ID.
-                'product_variation_id'=> $productVariation->id,     // Variation ID.
-                'available_quantity'  => $productVariation->quantity, // Variation (size-specific) quantity.
-                'global_quantity'     => $product->quantity,        // Global product quantity.
+                'size'                => $size->name,             
+                'size_id'             => $size->id,               
+                'product_variation_id' => $productVariation->id,     
+                'available_quantity'  => $productVariation->quantity, 
+                'global_quantity'     => $product->quantity,       
             ]
         )->associate('App\Models\Product');
 
@@ -95,11 +93,11 @@ class CartController extends Controller
 
         // Retrieve available and global quantities from cart item options.
         $availableQuantity = isset($cartItem->options->available_quantity)
-                             ? (int)$cartItem->options->available_quantity
-                             : PHP_INT_MAX;
+            ? (int)$cartItem->options->available_quantity
+            : PHP_INT_MAX;
         $globalQuantity = isset($cartItem->options->global_quantity)
-                          ? (int)$cartItem->options->global_quantity
-                          : PHP_INT_MAX;
+            ? (int)$cartItem->options->global_quantity
+            : PHP_INT_MAX;
         $allowedMax = min($availableQuantity, $globalQuantity);
 
         if ($newQuantity > $allowedMax) {
@@ -111,7 +109,7 @@ class CartController extends Controller
 
         // Update the quantity in the cart.
         Cart::instance('cart')->update($rowId, ['qty' => $newQuantity]);
-        
+
         $this->calculateDiscounts();
         $updatedCartItem = Cart::instance('cart')->get($rowId);
 
@@ -121,7 +119,7 @@ class CartController extends Controller
 
         $subtotal = (float) str_replace(',', '', Cart::instance('cart')->subtotal());
         $tax      = (float) str_replace(',', '', Cart::instance('cart')->tax());
-        $total    = (float) str_replace(',', '', Cart::instance('cart')->total()); 
+        $total    = (float) str_replace(',', '', Cart::instance('cart')->total());
 
         // Add shipping cost to total.
         $finalTotal = $total + $shippingCost;
@@ -157,9 +155,9 @@ class CartController extends Controller
         if (isset($coupon_code)) {
             $cartSubtotal = floatval(str_replace(',', '', Cart::instance('cart')->subtotal()));
             $coupon = Coupon::where('code', $coupon_code)
-                            ->where('expiry_date', '>=', Carbon::today())
-                            ->where('cart_value', '<=', $cartSubtotal)
-                            ->first();
+                ->where('expiry_date', '>=', Carbon::today())
+                ->where('cart_value', '<=', $cartSubtotal)
+                ->first();
             if (!$coupon) {
                 session()->forget('coupon');
                 return back()->with('error', 'Invalid coupon code');
@@ -219,8 +217,8 @@ class CartController extends Controller
     {
         // Calculate cart subtotal and set shipping cost accordingly.
         $cartSubtotal = (float) str_replace(',', '', Cart::instance('cart')->subtotal());
-        $shippingCost = ($cartSubtotal > 7000) ? 0 : 250;
-        
+        $shippingCost = ($cartSubtotal > 6999) ? 0 : 250;
+
         if (Cart::instance('cart')->count() > 0) {
             if (session()->has('coupon')) {
                 // Get discount totals, remove commas, then add shipping.
@@ -298,8 +296,8 @@ class CartController extends Controller
 
                 // Check if the selected size is in stock
                 $productVariation = Product_Variations::where('product_id', $item->id)
-                                                      ->where('size_id', $item->options->size_id)
-                                                      ->first();
+                    ->where('size_id', $item->options->size_id)
+                    ->first();
                 if (!$productVariation || $productVariation->quantity < $item->qty) {
                     return back()->with('error', "Sorry, the selected size is out of stock.");
                 }
@@ -312,7 +310,7 @@ class CartController extends Controller
 
             // Calculate shipping cost based on cart subtotal.
             $cartSubtotal = (float) str_replace(',', '', Cart::instance('cart')->subtotal());
-            $shippingCost = ($cartSubtotal > 7000) ? 0 : 250;
+            $shippingCost = ($cartSubtotal > 6999) ? 0 : 250;
 
             // Create the order
             $order = new Order();
@@ -337,8 +335,8 @@ class CartController extends Controller
             foreach (Cart::instance('cart')->content() as $item) {
                 $product = Product::find($item->id);
                 $productVariation = Product_Variations::where('product_id', $item->id)
-                                                      ->where('size_id', $item->options->size_id)
-                                                      ->first();
+                    ->where('size_id', $item->options->size_id)
+                    ->first();
 
                 // Reduce size-specific stock
                 if ($productVariation) {
@@ -382,7 +380,6 @@ class CartController extends Controller
             }
 
             return redirect()->route('cart.confirmation')->with('order_id', $order->id);
-
         } catch (\Exception $e) {
             Log::error('Order placement failed', ['error' => $e->getMessage()]);
             return back()->with('error', 'Order could not be placed. Please try again.');

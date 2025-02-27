@@ -66,7 +66,7 @@
                         @php
                             // Set the fixed shipping cost conditionally based on cart subtotal.
                             $cartSubtotal = (float) str_replace(',', '', Cart::instance('cart')->subtotal());
-                            $shippingCost = ($cartSubtotal > 7000) ? 0 : 250;
+                            $shippingCost = ($cartSubtotal > 6999) ? 0 : 250;
                         @endphp
                             @foreach ($cartItems as $cartItem)
                                 <tr>
@@ -170,7 +170,7 @@
                             @php
                                 // Recalculate cart subtotal and shipping cost for totals
                                 $cartSubtotal = (float) str_replace(',', '', Cart::instance('cart')->subtotal());
-                                $shippingCost = ($cartSubtotal > 7000) ? 0 : 250;
+                                $shippingCost = ($cartSubtotal > 6999) ? 0 : 250;
                             @endphp
                             @if(Session()->has('discounts'))
                                 <table class="cart-totals">

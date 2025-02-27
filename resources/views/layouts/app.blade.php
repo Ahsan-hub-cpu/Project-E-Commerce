@@ -519,7 +519,7 @@ body {
    
    <div class="top-bar">
     <div class="container">
-      <p class="top-bar__text">Free shipping on orders more than PKR 7000!</p>
+      <p class="top-bar__text">Free shipping on orders more than PKR 6999!</p>
     </div>
   </div>
 

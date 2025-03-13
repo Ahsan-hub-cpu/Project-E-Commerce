@@ -15,7 +15,7 @@ class Order extends Model
         'landmark', 'zip', 'type', 'status', 'is_shipping_different',
         'delivered_date', 'canceled_date'
     ];
-
+    protected $table = 'orders';
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
